@@ -266,7 +266,8 @@
     #stack, .screen.active{min-height:var(--app-height, 100dvh);}
     .screen{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
     #screen-mobile .legal-text{margin-top:16px; margin-bottom:10px;}
-    .keyboard-open #screen-mobile .legal-text{display:none !important;}
+    .keyboard-open #screen-mobile .legal-text,
+    .mobile-input-focused #screen-mobile .legal-text{display:none !important;}
   }
 
   /* ---------- splash ---------- */
@@ -834,8 +835,14 @@ mobileInput.addEventListener('input', ()=>{
   mobileContinue.classList.toggle('enabled', valid);
   updateMobileLabel();
 });
-mobileInput.addEventListener('focus', updateMobileLabel);
-mobileInput.addEventListener('blur', updateMobileLabel);
+mobileInput.addEventListener('focus', ()=>{
+  document.documentElement.classList.add('mobile-input-focused');
+  updateMobileLabel();
+});
+mobileInput.addEventListener('blur', ()=>{
+  document.documentElement.classList.remove('mobile-input-focused');
+  updateMobileLabel();
+});
 mobileInput.addEventListener('focus', ()=>keepFocusedControlVisible(mobileInput));
 
 function clearMobile(){
@@ -908,6 +915,7 @@ function onMobilePrimaryClick(){
 }
 
 function startVerifying(){
+  document.documentElement.classList.remove('mobile-input-focused');
   mobileStep = 'verifying';
   state.mobile = mobileInput.value;
   mobileInput.readOnly = true;
