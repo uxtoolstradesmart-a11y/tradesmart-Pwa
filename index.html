@@ -192,6 +192,67 @@
   .info-card-title{font-size:16px;font-weight:500;color:#0a0600;margin:0 0 3px 0;}
   .info-card-desc{font-size:13.7px;line-height:18px;color:var(--grey-555);margin:0;font-family:'Roboto',sans-serif;}
 
+  /* Later screens use the compact header from the updated mobile designs. */
+  #screen-otp .brand-header,
+  #screen-temp-login .brand-header,
+  #screen-forgot .brand-header,
+  #screen-temp-sent .brand-header,
+  #screen-new-password .brand-header,
+  #screen-mobile.mobile-secondary .brand-header{
+    align-items:flex-start; gap:0; padding:0; margin:0 0 30px; border-bottom:none;
+  }
+  #screen-otp .brand-header svg,
+  #screen-temp-login .brand-header svg,
+  #screen-forgot .brand-header svg,
+  #screen-temp-sent .brand-header svg,
+  #screen-new-password .brand-header svg,
+  #screen-mobile.mobile-secondary .brand-header svg{width:92px;}
+  #screen-otp .brand-tagline,
+  #screen-temp-login .brand-tagline,
+  #screen-forgot .brand-tagline,
+  #screen-temp-sent .brand-tagline,
+  #screen-new-password .brand-tagline,
+  #screen-mobile.mobile-secondary .brand-tagline{display:none;}
+
+  .demat-card{
+    position:relative; min-height:119px; margin-top:16px; overflow:hidden;
+    border:1px solid rgba(63,113,235,0.22); border-radius:8px;
+    background:linear-gradient(100deg,#fff 20%,rgba(63,113,235,0.10) 100%);
+    padding:16px 116px 14px 16px;
+  }
+  .demat-card::after{
+    content:''; position:absolute; width:100px; height:100px; right:10px; top:10px;
+    border-radius:50%; background:rgba(63,113,235,0.10);
+  }
+  .demat-card-art{
+    position:absolute; z-index:1; right:17px; top:20px; width:86px; height:86px;
+    color:var(--blue);
+  }
+  .demat-card-title{font-size:16px; line-height:20px; font-weight:500; color:#0a0600; margin:0 0 10px;}
+  .demat-card-desc{display:none;}
+  .demat-card-action{
+    display:inline-flex; align-items:center; height:28px; padding:0 12px;
+    border:1px solid var(--blue); border-radius:14px; color:var(--blue);
+    font-family:'Source Sans 3',sans-serif; font-size:13px; font-weight:600;
+  }
+
+  /* Keep controls reachable when the visual viewport is reduced by the keyboard. */
+  #screen-mobile.mobile-secondary,
+  #screen-otp,
+  #screen-temp-login,
+  #screen-forgot,
+  #screen-temp-sent,
+  #screen-new-password{overflow-y:auto; overscroll-behavior:contain;}
+  #screen-mobile input,
+  #screen-otp input,
+  #screen-temp-login input,
+  #screen-forgot input,
+  #screen-new-password input{scroll-margin-bottom:120px;}
+
+  /* The centered first-state composition follows the supplied 412px reference. */
+  #screen-mobile:not(.mobile-secondary){padding-top:44px;}
+  #screen-mobile:not(.mobile-secondary) .brand-header{margin-bottom:34px;}
+
   .legal-text{
     font-family:'Source Sans 3',sans-serif; font-size:0; color:var(--grey-555);
     text-align:center; margin:24px 0 12px;
@@ -372,12 +433,16 @@
       </div>
 
       <div class="result-block" id="noAccountBlock">
-        <div class="info-card">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3z"/><path d="M9 12l2 2 4-4"/></svg>
-          <div>
-            <p class="info-card-title">Let&rsquo;s open your Demat account.</p>
-            <p class="info-card-desc">Your mobile number is verified. Complete a few quick steps to open your TradeSmart account.</p>
-          </div>
+        <div class="demat-card">
+          <svg class="demat-card-art" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+            <rect x="25" y="21" width="49" height="58" rx="7" fill="#fff" stroke="currentColor" stroke-width="2"/>
+            <path d="M35 35h29M35 44h20M35 61h18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+            <circle cx="66" cy="67" r="13" fill="#3F71EB"/>
+            <path d="M59.5 67l4.2 4.2 8-8.4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="demat-card-title">Let&rsquo;s open your Demat account.</p>
+          <p class="demat-card-desc">Complete a few quick steps to start investing with TradeSmart.</p>
+          <span class="demat-card-action">Open an account</span>
         </div>
       </div>
 
@@ -674,6 +739,10 @@ function updateMobileLabel(){
   const show = document.activeElement === mobileInput || mobileInput.value.length>0;
   mobileLabel.classList.toggle('hide', !show);
 }
+
+function updateMobileHeaderMode(){
+  document.getElementById('screen-mobile').classList.toggle('mobile-secondary', mobileStep === 'password');
+}
 mobileInput.addEventListener('input', ()=>{
   mobileInput.value = mobileInput.value.replace(/\D/g,'');
   mobileClear.style.display = mobileInput.value.length ? 'flex' : 'none';
@@ -720,6 +789,7 @@ function togglePw(id, btn){
 
 function resetToMobileEntry(){
   mobileStep = 'entry';
+  updateMobileHeaderMode();
   mobileInput.readOnly = false;
   mobileInput.value = '';
   mobileClear.style.display='none';
@@ -782,6 +852,7 @@ function showVerifyResult(){
     mobileContinue.classList.add('enabled');
   } else {
     mobileStep = 'password';
+    updateMobileHeaderMode();
     mobileHeading.textContent = 'Hey Aditya, Welcome back!';
     tryAnotherBtn.style.display='none';
     mobileLegal.style.display='none';
