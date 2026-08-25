@@ -1,10 +1,11 @@
-const CACHE = 'tradesmart-login-pwa-v4';
+const CACHE = 'tradesmart-login-pwa-v5';
 const APP_SHELL = [
   './',
   './index.html',
   './manifest.webmanifest',
   './icons/icon.svg',
-  './icons/open-account.svg'
+  './icons/open-account.svg',
+  './icons/temporary-password.svg'
 ];
 
 self.addEventListener('install', event => {
