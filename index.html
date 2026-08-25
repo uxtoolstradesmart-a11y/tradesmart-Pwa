@@ -1013,9 +1013,6 @@ function validateNewPassword(){
   const saveBtn = document.getElementById('saveChangesBtn');
   saveBtn.disabled = !canSave;
   saveBtn.classList.toggle('enabled', canSave);
-  if(allOk && document.activeElement === document.getElementById('newPw') && confirm.length === 0){
-    setTimeout(()=>document.getElementById('confirmPw').focus(), 80);
-  }
 }
 function tri(typed, passed){
   return !typed ? 'neutral' : (passed ? 'ok' : 'fail');
@@ -1046,7 +1043,9 @@ function onSaveChanges(){
 <script>
   // The service worker is intentionally best-effort so the prototype still works from a file preview.
   if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
-    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./service-worker.js').then(registration => registration.update());
+    });
   }
 </script>
 </body>
