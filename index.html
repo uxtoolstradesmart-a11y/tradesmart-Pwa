@@ -391,7 +391,7 @@
         <div class="field-box" id="mobileBox">
           <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v1.6c0 .7.5 1.2 1.2 1.2h17.2c.7 0 1.2-.5 1.2-1.2v-1.6c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
           <div class="field-divider"></div>
-          <input type="tel" id="mobileInput" placeholder="Mobile Number or User ID" maxlength="10" inputmode="numeric" autocomplete="off" enterkeyhint="go">
+          <input type="text" id="mobileInput" placeholder="Mobile Number or User ID" maxlength="20" inputmode="text" autocomplete="username" enterkeyhint="go">
           <button class="field-suffix-btn" id="mobileClear" style="display:none;" onclick="clearMobile()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5l5 5m0-5l-5 5"/></svg>
           </button>
@@ -738,9 +738,10 @@ function updateMobileHeaderMode(){
   screen.classList.toggle('mobile-no-account', mobileStep === 'no-account');
 }
 mobileInput.addEventListener('input', ()=>{
-  mobileInput.value = mobileInput.value.replace(/\D/g,'');
+  mobileInput.value = mobileInput.value.replace(/[^a-zA-Z0-9]/g,'');
   mobileClear.style.display = mobileInput.value.length ? 'flex' : 'none';
-  const valid = mobileInput.value.length === 10;
+  const value = mobileInput.value.trim();
+  const valid = /^\d{10}$/.test(value) || /^[a-zA-Z][a-zA-Z0-9]{5,19}$/.test(value);
   mobileContinue.disabled = !valid;
   mobileContinue.classList.toggle('enabled', valid);
   updateMobileLabel();
