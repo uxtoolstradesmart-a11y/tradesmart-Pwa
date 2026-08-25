@@ -14,7 +14,7 @@
 <title>TradeSmart — Login Flow Prototype</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
 <style>
   :root{
     --blue:#3F71EB;
@@ -108,7 +108,7 @@
   }
   .brand-header svg{width:136px;height:auto;}
   .brand-tagline{
-    font-family:'Roboto',sans-serif; font-weight:400; font-size:16px;
+    font-family:'Roboto',sans-serif; font-weight:300; font-size:16px;
     color:var(--grey-555); text-align:center; margin:0;
   }
 
@@ -327,6 +327,7 @@
     margin-bottom:2px;
     scroll-margin-bottom:calc(18px + env(safe-area-inset-bottom));
   }
+  .keyboard-open #screen-new-password .btn-row{display:none;}
 
   .toast{
     position:fixed; left:50%; bottom:24px; transform:translate(-50%,12px);
@@ -512,7 +513,7 @@
             <div class="field-box">
             <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 10h6M13 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
             <div class="field-divider"></div>
-            <input type="text" id="forgotPan" placeholder="Enter your PAN number" autocomplete="off" style="text-transform:uppercase;" enterkeyhint="go">
+            <input type="text" id="forgotPan" placeholder="Enter your PAN number" autocomplete="off" enterkeyhint="go">
           </div>
         </div>
       </div>
@@ -1045,11 +1046,7 @@ onEnterKey(confirmPwEl, ()=>{ if(!saveChangesBtnEl.disabled) saveChangesBtnEl.cl
 newPwEl.addEventListener('focus', validateNewPassword);
 newPwEl.addEventListener('blur', validateNewPassword);
 newPwEl.addEventListener('focus', ()=>keepFocusedControlVisible(newPwEl));
-confirmPwEl.addEventListener('focus', ()=>{
-  keepFocusedControlVisible(confirmPwEl);
-  setTimeout(()=>document.querySelector('#screen-new-password .btn-row')
-    .scrollIntoView({block:'nearest', inline:'nearest'}), 160);
-});
+confirmPwEl.addEventListener('focus', ()=>keepFocusedControlVisible(confirmPwEl));
 
 function onSaveChanges(){
   document.getElementById('successHeading').textContent = 'Password updated!';
