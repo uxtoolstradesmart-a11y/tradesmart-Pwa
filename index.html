@@ -331,6 +331,38 @@
   }
   .keyboard-open #screen-new-password .btn-row{display:none;}
 
+  /* ---------- eKYC hand-off prototype ---------- */
+  #screen-ekyc{padding:0; overflow:hidden; background:#fff;}
+  .ekyc-browser-top{height:94px; flex:none; background:#F5F5F7; padding:0 12px 10px;}
+  .ekyc-status{height:42px; display:flex; align-items:center; justify-content:space-between; padding:0 4px; font-size:14px; font-weight:600;}
+  .ekyc-status-icons{font-size:13px; letter-spacing:2px;}
+  .ekyc-address{height:36px; border-radius:10px; background:rgba(118,118,128,.12); display:flex; align-items:center; justify-content:center; position:relative; color:#4E8B43; font-size:16px;}
+  .ekyc-address .reader{position:absolute; left:12px; color:#111; font-size:14px;}
+  .ekyc-address .reload{position:absolute; right:12px; color:#111; font-size:22px; line-height:1;}
+  .ekyc-site{min-height:0; flex:1; display:flex; flex-direction:column; background:#fff;}
+  .ekyc-logo{height:100px; flex:none; display:flex; align-items:center; justify-content:center;}
+  .ekyc-logo svg{width:104px; height:auto;}
+  .ekyc-card{min-height:0; flex:1; display:flex; flex-direction:column; border-radius:22px 22px 0 0; box-shadow:0 0 11px rgba(0,0,0,.25); overflow:hidden;}
+  .ekyc-card-title{height:50px; flex:none; display:flex; align-items:center; padding:0 22px; background:rgba(242,248,251,.6); font-size:16px; font-weight:500;}
+  .ekyc-card-body{min-height:0; flex:1; display:flex; flex-direction:column; padding:20px 22px 28px;}
+  .ekyc-copy{margin:0; color:var(--grey-555); font-size:14px; line-height:22px;}
+  .ekyc-copy strong{font-weight:600;}
+  .ekyc-slots{display:flex; justify-content:space-between; gap:14px; margin-top:40px;}
+  .ekyc-slot{width:46px; height:30px; border-bottom:2px solid #C7C7C7; display:flex; align-items:flex-start; justify-content:center; color:#222; font-size:19px; font-weight:600;}
+  .ekyc-resend{align-self:flex-start; margin-top:16px; padding:0; border:0; background:none; color:var(--blue); font:400 15px 'Roboto',sans-serif; cursor:pointer;}
+  .ekyc-actions{margin-top:auto;}
+  .ekyc-continue{height:55px; text-transform:none; font-size:18px; font-weight:600;}
+  .ekyc-return{display:block; margin:17px auto 0; border:0; background:none; color:var(--blue); font:400 14px 'Roboto',sans-serif; cursor:pointer;}
+  .ekyc-toolbar{height:83px; flex:none; border-top:1px solid #D7D7D7; background:rgba(249,249,249,.96); display:flex; align-items:flex-start; justify-content:space-around; padding-top:13px; color:#2E7CF6; font-size:28px;}
+  .ekyc-toolbar span:nth-child(2){color:#CECECE;}
+  @media(max-height:700px){
+    .ekyc-browser-top{height:74px;}
+    .ekyc-status{height:30px;}
+    .ekyc-logo{height:72px;}
+    .ekyc-slots{margin-top:24px;}
+    .ekyc-toolbar{height:60px;}
+  }
+
   .toast{
     position:fixed; left:50%; bottom:24px; transform:translate(-50%,12px);
     background:#1a1a1a; color:#fff; padding:12px 18px; border-radius:8px;
@@ -614,6 +646,35 @@
       </div>
     </section>
 
+    <!-- eKYC OTP HAND-OFF -->
+    <section class="screen" id="screen-ekyc">
+      <div class="ekyc-browser-top">
+        <div class="ekyc-status"><span>9:41</span><span class="ekyc-status-icons">▮▮ ◉ ▰</span></div>
+        <div class="ekyc-address"><span class="reader">AA</span><span>🔒 domain.com</span><span class="reload">↻</span></div>
+      </div>
+      <div class="ekyc-site">
+        <div class="ekyc-logo">
+          <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        </div>
+        <div class="ekyc-card">
+          <div class="ekyc-card-title">ENTER OTP</div>
+          <div class="ekyc-card-body">
+            <p class="ekyc-copy">We have sent you a <strong>6 digit OTP</strong> on your mobile number<br><strong id="ekycMobile">9999999999</strong></p>
+            <div class="ekyc-slots" id="ekycOtpSlots" aria-label="eKYC OTP">
+              <span class="ekyc-slot"></span><span class="ekyc-slot"></span><span class="ekyc-slot"></span>
+              <span class="ekyc-slot"></span><span class="ekyc-slot"></span><span class="ekyc-slot"></span>
+            </div>
+            <button class="ekyc-resend" onclick="resendEkycOtp()">Resend OTP</button>
+            <div class="ekyc-actions">
+              <button class="btn ekyc-continue" id="ekycContinue" disabled onclick="onEkycContinue()">Continue</button>
+              <button class="ekyc-return" onclick="returnFromEkyc()">Return to Login/ Sign-up Page</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ekyc-toolbar" aria-hidden="true"><span>‹</span><span>›</span><span>⇧</span><span>▢</span><span>▣</span></div>
+    </section>
+
     <!-- SUCCESS -->
     <section class="screen" id="screen-success">
       <div class="success-wrap">
@@ -656,6 +717,7 @@ let history = ['screen-splash'];
 function goTo(id, replace){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  document.querySelector('.restart-btn').style.display = id === 'screen-ekyc' ? 'none' : 'flex';
   if(replace){ history[history.length-1] = id; } else { history.push(id); }
   window.scrollTo(0,0);
   if(id === 'screen-otp') startOtpCountdown();
@@ -815,7 +877,7 @@ function onMobilePrimaryClick(){
   } else if(mobileStep === 'password'){
     onPasswordContinue();
   } else if(mobileStep === 'no-account'){
-    showToast('This would continue into account opening — outside this prototype.');
+    openEkycOtp();
   }
 }
 
@@ -909,6 +971,55 @@ function startOtpCountdown(){
     }
     resendOtpBtn.textContent = `Resend Code in ${secondsLeft} sec`;
   }, 1000);
+}
+
+/* ---------------- eKYC OTP hand-off prototype ---------------- */
+let ekycAutofillTimers = [];
+
+function clearEkycAutofill(){
+  ekycAutofillTimers.forEach(timer=>clearTimeout(timer));
+  ekycAutofillTimers = [];
+}
+
+function openEkycOtp(){
+  document.getElementById('ekycMobile').textContent = state.mobile || mobileInput.value || '9999999999';
+  goTo('screen-ekyc');
+  scheduleEkycOtpAutofill();
+}
+
+function scheduleEkycOtpAutofill(){
+  clearEkycAutofill();
+  const slots = Array.from(document.querySelectorAll('.ekyc-slot'));
+  const continueBtn = document.getElementById('ekycContinue');
+  slots.forEach(slot=>slot.textContent='');
+  continueBtn.disabled = true;
+  continueBtn.classList.remove('enabled');
+  const digits = ['1','8','4','6','2','9'];
+  digits.forEach((digit, index)=>{
+    const timer = setTimeout(()=>{
+      slots[index].textContent = digit;
+      if(index === digits.length - 1){
+        continueBtn.disabled = false;
+        continueBtn.classList.add('enabled');
+      }
+    }, 2400 + (index * 180));
+    ekycAutofillTimers.push(timer);
+  });
+}
+
+function resendEkycOtp(){
+  showToast('A new eKYC OTP has been sent.');
+  scheduleEkycOtpAutofill();
+}
+
+function onEkycContinue(){
+  showToast('OTP verified. Continuing eKYC…');
+}
+
+function returnFromEkyc(){
+  clearEkycAutofill();
+  resetToMobileEntry();
+  goTo('screen-mobile');
 }
 
 function onResendOtp(){
