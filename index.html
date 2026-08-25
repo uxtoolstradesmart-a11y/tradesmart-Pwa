@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TradeSmart">
+<meta name="theme-color" content="#ffffff">
+<meta name="application-name" content="TradeSmart">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+<title>TradeSmart — Login Flow Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#3F71EB;
+    --blue-disabled:rgba(63,113,235,0.5);
+    --grey-border:rgba(128,128,128,0.35);
+    --grey-777:#777777;
+    --grey-555:#555555;
+    --grey-333:#333333;
+    --black:#000000;
+    --red:#F03745;
+    --green:#079A80;
+    --otp-inactive:rgba(176,176,176,0.45);
+    --radius-sm:4px;
+    --radius-md:6px;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0; overscroll-behavior:none; width:100%; min-height:100%;}
+  body{
+    background:#E9EBEF;
+    font-family:'Roboto',sans-serif;
+    color:var(--black);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    min-height:100dvh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    -webkit-user-select:none; user-select:none;
+    overscroll-behavior-y:contain;
+    touch-action:pan-y;
+  }
+  input, textarea{ -webkit-user-select:text; user-select:text; }
+  .device{
+    width:100%;
+    max-width:430px;
+    min-height:100vh;
+    min-height:100dvh;
+    background:#fff;
+    position:relative;
+    overflow:hidden;
+    box-shadow:0 0 40px rgba(0,0,0,0.08);
+  }
+  @media(min-width:431px){
+    body{padding:32px 0; min-height:100vh;}
+    .device{height:917px; min-height:917px; border-radius:28px; margin-top:8px;}
+  }
+  @media(display-mode: standalone){
+    body{padding:0; align-items:stretch; background:#fff;}
+    .device{
+      width:100%; max-width:none; height:100dvh; min-height:100dvh;
+      border-radius:0; box-shadow:none;
+      padding-top:env(safe-area-inset-top);
+      padding-bottom:env(safe-area-inset-bottom);
+    }
+  }
+
+  /* ---------- restart control ---------- */
+  .restart-btn{
+    position:absolute; top:14px; right:14px; z-index:50;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(0,0,0,0.05);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer; border:none;
+  }
+  .restart-btn svg{width:16px;height:16px;stroke:var(--grey-555);}
+  .restart-btn:hover{background:rgba(0,0,0,0.1);}
+
+  /* ---------- screen stack ---------- */
+  #stack{position:relative; width:100%; min-height:100vh; min-height:100dvh;}
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    background:#fff;
+    padding:32px 16px 24px;
+    opacity:0; pointer-events:none;
+    transform:translateX(24px);
+    transition:opacity .28s ease, transform .32s ease;
+  }
+  .screen.active{
+    position:relative;
+    opacity:1; pointer-events:auto; transform:translateX(0);
+    min-height:100vh; min-height:100dvh;
+  }
+  .screen.leaving-back{transform:translateX(-24px); opacity:0;}
+
+  /* ---------- shared header ---------- */
+  .brand-header{
+    display:flex; flex-direction:column; align-items:center; gap:14px;
+    padding-bottom:16px; margin-bottom:34px;
+    border-bottom:1px solid rgba(128,128,128,0.15);
+  }
+  .brand-header svg{width:136px;height:auto;}
+  .brand-tagline{
+    font-family:'Roboto',sans-serif; font-weight:500; font-size:16px;
+    color:var(--grey-555); text-align:center; margin:0;
+  }
+
+  .footnote{
+    margin-top:auto; padding-top:24px;
+    font-size:12px; color:var(--grey-555); text-align:center; line-height:1.5;
+  }
+
+  h1.screen-title{
+    font-size:20px; font-weight:500; margin:0 0 20px 0; color:var(--black);
+  }
+
+  .field-group{display:flex;flex-direction:column;gap:16px;}
+  .field-wrap{position:relative;}
+  .field-label{
+    font-size:14px; color:var(--grey-777); margin:2px 0 2px 2px; display:block;
+    max-height:18px; opacity:1; overflow:hidden; line-height:18px;
+    transition:max-height .15s ease, opacity .15s ease, margin .15s ease;
+  }
+  .field-label.hide{max-height:0; opacity:0; margin:0 0 0 2px;}
+  .field-label.err{color:var(--red);}
+  .field-box{
+    border:1px solid var(--grey-border);
+    border-radius:var(--radius-sm);
+    display:flex; align-items:center; gap:12px;
+    padding:0 13px 0 15px; height:46px; margin-top:2px;
+    transition:border-color .15s;
+    background:#fff;
+  }
+  .field-box:focus-within{border-color:var(--blue); border-width:2px; padding:0 12px 0 14px;}
+  .field-box:focus-within .field-icon{color:var(--blue);}
+  .field-box:focus-within .field-divider{background:var(--blue);}
+  .field-box.err{border-color:var(--red); border-width:2px; padding:0 12px 0 14px;}
+  .field-box.verified{border-color:var(--grey-border);}
+  .field-box.verified:focus-within{border-color:var(--grey-border); border-width:1px; padding:0 13px 0 15px;}
+  .field-icon{width:16px;height:16px;flex:none;color:var(--grey-777);}
+  .field-box.err .field-icon{color:var(--red);}
+  .field-divider{width:1px;height:26px;background:var(--grey-border);flex:none;}
+  .field-box.err .field-divider{background:var(--red);}
+  .field-box input{
+    border:none; outline:none; flex:1; min-width:0;
+    font-family:'Roboto',sans-serif; font-weight:600; font-size:16px;
+    color:var(--grey-333); letter-spacing:0.28px; background:transparent; height:100%;
+  }
+  .field-box input::placeholder{font-weight:400; color:var(--grey-777);}
+  .field-suffix-btn{flex:none; width:20px;height:20px; background:none; border:none; padding:0; cursor:pointer; color:var(--grey-777); display:flex;align-items:center;justify-content:center;}
+  .field-suffix-btn svg{width:20px;height:20px;}
+  .field-verified{width:20px;height:20px;flex:none; display:none;}
+  .spinner{width:20px;height:20px;flex:none;}
+  .spinner svg{width:20px;height:20px;animation:spin 1.5s linear infinite;}
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .result-block{
+    max-height:0; opacity:0; overflow:hidden;
+    transition:max-height .35s ease, opacity .3s ease, margin .35s ease;
+  }
+  .result-block.show{max-height:420px; opacity:1; margin-top:16px;}
+
+  .helper-row{display:flex; align-items:center; gap:4px; justify-content:flex-start; margin-top:8px;}
+  .helper-row svg{width:16px;height:16px;color:var(--grey-777);flex:none;}
+  .helper-row span{font-family:'Source Sans 3',sans-serif; font-size:14px; color:var(--grey-777);}
+
+  .error-row{display:flex; align-items:center; gap:4px; margin-top:8px;}
+  .error-row svg{width:16px;height:16px;color:var(--red);flex:none;}
+  .error-row span{font-family:'Source Sans 3',sans-serif; font-size:14px; color:var(--red);}
+
+  .link-row{display:flex; justify-content:flex-end; margin-top:8px;}
+  .link-btn{
+    font-family:'Source Sans 3',sans-serif; font-size:14px; color:var(--blue);
+    background:none;border:none;padding:0;cursor:pointer;text-decoration:none;
+  }
+  .link-btn:hover{text-decoration:underline;}
+  .try-another{font-family:'Source Sans 3',sans-serif;font-size:14px;color:var(--blue);background:none;border:none;padding:0;cursor:pointer;margin-top:8px;align-self:flex-start;}
+
+  .info-card{
+    border:1px solid rgba(63,113,235,0.22); border-radius:var(--radius-md);
+    background:linear-gradient(100deg,#fff 21%, rgba(63,113,235,0.12) 200%);
+    padding:16px; display:flex; gap:10px; align-items:flex-start; margin-top:16px;
+  }
+  .info-card svg{width:32px;height:32px;flex:none;color:var(--blue);}
+  .info-card-title{font-size:16px;font-weight:500;color:#0a0600;margin:0 0 3px 0;}
+  .info-card-desc{font-size:13.7px;line-height:18px;color:var(--grey-555);margin:0;font-family:'Roboto',sans-serif;}
+
+  .legal-text{
+    font-family:'Source Sans 3',sans-serif; font-size:0; color:var(--grey-555);
+    text-align:center; margin:24px 0 12px;
+  }
+  .legal-text span{font-size:14px;line-height:normal;}
+  .legal-text a{color:var(--grey-555); font-size:14px; text-decoration:underline;}
+
+  .btn{
+    width:100%; height:50px; border-radius:var(--radius-sm); border:none;
+    font-family:'Roboto',sans-serif; font-weight:500; font-size:16px;
+    letter-spacing:0.5px; text-transform:uppercase; cursor:pointer;
+    background:var(--blue-disabled); color:#fff; transition:background .15s;
+  }
+  .btn.enabled{background:var(--blue); cursor:pointer;}
+  .btn.enabled:active{background:#2f5cd0;}
+  .btn:disabled{cursor:not-allowed;}
+  .btn-outline{
+    background:#fff; color:var(--grey-555); border:1px solid var(--grey-555);
+  }
+  .btn-row{display:flex; gap:8px;}
+  .btn-row .btn{flex:1;}
+
+  .spacer{flex:1;}
+
+  /* ---------- splash ---------- */
+  #screen-splash{align-items:center; justify-content:center;}
+  #screen-splash svg{width:136px;}
+
+  /* ---------- OTP ---------- */
+  .otp-row{display:flex; gap:14px; justify-content:center; margin-top:24px;}
+  .otp-box{
+    width:15.5%; max-width:52px; height:50px; border-radius:6px;
+    border:1px solid var(--otp-inactive);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Roboto',sans-serif; font-weight:700; font-size:18px; color:#1a1a1a;
+    background:none; outline:none; text-align:center; padding:0;
+  }
+  .otp-box:focus, .otp-box.filled{border-color:var(--blue);}
+  @keyframes otpBounce{
+    0%{ transform:scale(1); }
+    40%{ transform:scale(1.08); }
+    70%{ transform:scale(0.98); }
+    100%{ transform:scale(1); }
+  }
+  .otp-box.bounce{ animation:otpBounce .28s cubic-bezier(.34,1.2,.64,1); }
+  .resend{
+    display:block; text-align:center; margin:12px auto 0; font-size:14px;
+    font-weight:500; color:var(--blue); background:none; border:none; cursor:pointer;
+    font-family:'Roboto',sans-serif;
+  }
+  .otp-subtext{font-size:16px; line-height:22px; color:var(--grey-555); margin:12px 0 0;}
+
+  /* ---------- checklist ---------- */
+  .checklist{
+    background:#F6F8FC; border-radius:8px; padding:16px 16px 16px 12px;
+    margin-top:8px; display:flex; flex-direction:column; gap:16px;
+  }
+  .check-item{display:flex; align-items:flex-start; gap:8px;}
+  .check-item svg{width:20px;height:20px;flex:none; color:var(--grey-555);}
+  .check-item svg .badge,.check-item svg .tick,.check-item svg .cross{display:none;}
+  .check-item.ok svg{color:var(--green);}
+  .check-item.ok svg .ring{display:none;}
+  .check-item.ok svg .badge{display:block; fill:currentColor;}
+  .check-item.ok svg .tick{display:block;}
+  .check-item.fail svg{color:var(--red);}
+  .check-item.fail svg .ring{display:none;}
+  .check-item.fail svg .badge{display:block; fill:currentColor;}
+  .check-item.fail svg .cross{display:block;}
+  .check-item span{font-size:14px; color:var(--grey-555); line-height:18px;}
+  .check-item.ok span{color:var(--grey-333);}
+  .check-item.fail span{color:var(--red);}
+
+  .toast{
+    position:fixed; left:50%; bottom:24px; transform:translate(-50%,12px);
+    background:#1a1a1a; color:#fff; padding:12px 18px; border-radius:8px;
+    font-size:14px; font-family:'Roboto',sans-serif; opacity:0; pointer-events:none;
+    transition:opacity .2s, transform .2s; z-index:100; max-width:88%; text-align:center;
+  }
+  .toast.show{opacity:1; transform:translate(-50%,0);}
+
+  /* success */
+  .success-wrap{align-items:center; text-align:center; justify-content:center; flex:1; display:flex; flex-direction:column; gap:16px;}
+  .success-wrap svg{width:64px;height:64px;color:var(--green);}
+  .success-wrap h2{font-size:20px;margin:0;}
+  .success-wrap p{font-size:14px;color:var(--grey-555);margin:0; max-width:280px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="device">
+  <button class="restart-btn" onclick="restartFlow()" title="Restart prototype">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+  </button>
+
+  <div id="stack">
+
+    <!-- SPLASH -->
+    <section class="screen active" id="screen-splash">
+      <div class="spacer"></div>
+      <div style="align-self:center;">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M36.7424 48.8929C35.9506 48.8929 35.1589 48.6744 34.4492 48.2107C32.5108 46.9557 31.9375 44.3363 33.2207 42.3718L47.6075 20.2718C48.8632 18.3346 51.4839 17.7616 53.4496 19.044C55.3877 20.299 55.961 22.9183 54.678 24.8828L40.2912 46.9829C39.4723 48.2107 38.1346 48.8929 36.7424 48.8929Z" fill="#3F71EB"/>
+          <path d="M12.6643 32.3314C11.818 32.3314 10.9717 32.0859 10.2346 31.5675C8.32369 30.2307 7.88688 27.5841 9.22456 25.7014L21.7276 7.50299C23.0653 5.59309 25.7134 5.15655 27.597 6.49347C29.5079 7.8304 29.9448 10.477 28.6071 12.3596L16.104 30.558C15.285 31.704 14.0019 32.3314 12.6643 32.3314Z" fill="#E02B59"/>
+          <path d="M7.20445 15.5253C6.38548 15.5253 5.56651 15.2797 4.82942 14.7886C2.91847 13.479 2.42708 10.8597 3.73745 8.92251L8.43294 1.82865C9.7433 -0.0812379 12.364 -0.572352 14.3023 0.737286C16.2133 2.04692 16.7046 4.66621 15.3943 6.60338L10.6988 13.6972C9.87979 14.8977 8.54214 15.5253 7.20445 15.5253Z" fill="#EEB268"/>
+          <path d="M29.4804 33.8053C28.6886 33.8053 27.8972 33.587 27.1873 33.123C25.249 31.8408 24.6757 29.2489 25.9588 27.2844L42.0107 1.99197C43.2939 0.0548024 45.8873 -0.518163 47.8527 0.764189C49.7912 2.04654 50.3644 4.63854 49.0812 6.60299L33.0292 31.8953C32.2103 33.1505 30.8453 33.8053 29.4804 33.8053Z" fill="#00B48E"/>
+          <path d="M70.1018 9.0305V20.8991H66.4436V9.0305H61.748V5.78369H74.7971V9.0305H70.1018Z" fill="#151E34"/>
+          <path d="M85.7985 20.8991L83.0961 15.6605H80.2842V20.8991H76.626V5.78369H83.7238C87.4639 5.78369 89.4021 7.80271 89.4021 10.613C89.4021 12.8503 88.0099 14.3236 86.5902 14.9511L89.8388 20.8991H85.7985ZM83.6421 9.0305H80.2294V12.7684H83.6421C84.8158 12.7684 85.7167 12.059 85.7167 10.8858C85.744 9.65803 84.8158 9.0305 83.6421 9.0305Z" fill="#151E34"/>
+          <path d="M107.829 20.8991V5.78369H114.081C119.131 5.78369 121.834 9.05777 121.834 13.3414C121.834 17.625 119.131 20.8991 114.081 20.8991H107.829ZM114.108 17.6523C116.756 17.6523 118.121 15.9879 118.121 13.3141C118.121 10.6675 116.756 9.0032 114.108 9.0032H111.46V17.6796H114.108V17.6523Z" fill="#151E34"/>
+          <path d="M123.445 20.8991V5.78369H134.992V9.0305H127.048V11.5952H133.955V14.46H127.048V17.6796H135.211V20.8991H123.445Z" fill="#151E34"/>
+          <path d="M102.233 20.8991H106.274L100.704 5.78369H96.3366L90.7128 20.8991H94.6712L98.4386 8.78493L101.36 18.2252L102.233 20.8991Z" fill="#151E34"/>
+          <path d="M74.6061 30.5033L71.9035 32.1678C71.0025 30.8853 69.5556 30.3668 68.1088 30.3668C66.8256 30.3668 65.9249 30.8308 65.9249 31.813C65.9249 32.9043 67.3716 33.15 69.0096 33.45C72.1765 34.023 74.8791 34.9779 74.8791 38.0884C74.8791 40.9533 72.5587 43.1087 68.5183 43.1087C65.2424 43.1087 62.7035 41.717 61.5023 39.3161L64.3415 37.8154C65.3514 39.5343 66.9896 40.1618 68.6821 40.1618C70.2655 40.1618 71.3302 39.5616 71.3302 38.5793C71.3302 37.2971 69.856 37.0789 68.0541 36.7786C64.9695 36.2329 62.376 35.2507 62.376 32.0585C62.376 29.1936 64.751 27.4474 68.2453 27.4474C70.593 27.4202 73.0772 28.2661 74.6061 30.5033Z" fill="#151E34"/>
+          <path d="M90.5486 42.8082V31.5128L86.8632 42.8082H83.9423L80.2841 31.5945V42.8082H76.7625V27.6929H81.9766L85.4162 38.3063L88.8561 27.6929H94.0429V42.8082C94.0974 42.8082 90.5486 42.8082 90.5486 42.8082Z" fill="#151E34"/>
+          <path d="M121.233 42.8082L118.531 37.5698H115.719V42.8082H112.061V27.6929H119.186C122.926 27.6929 124.864 29.7118 124.864 32.5222C124.864 34.7594 123.472 36.2329 122.052 36.8604L125.301 42.8082C125.328 42.8082 121.233 42.8082 121.233 42.8082ZM119.104 30.9398H115.691V34.6777H119.104C120.278 34.6777 121.179 33.9682 121.179 32.795C121.179 31.5945 120.278 30.9398 119.104 30.9398Z" fill="#151E34"/>
+          <path d="M134.119 30.9398V42.8082H130.488V30.9398H125.792V27.6929H138.814V30.9398H134.119Z" fill="#151E34"/>
+          <path d="M106.792 42.8082H110.832L105.236 27.6929H100.923L95.2991 42.8082H99.2575L103.025 30.7215L105.946 40.1618L106.792 42.8082Z" fill="#151E34"/>
+        </svg>
+      </div>
+      <div class="spacer"></div>
+    </section>
+
+    <!-- MOBILE NUMBER / VERIFY / RESULT (single morphing screen, no page transitions) -->
+    <section class="screen" id="screen-mobile">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title" id="mobileHeading">Let&rsquo;s get started!</h1>
+      <div class="field-wrap">
+        <label class="field-label hide" id="mobileLabel">Mobile Number or User ID</label>
+        <div class="field-box" id="mobileBox">
+          <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v1.6c0 .7.5 1.2 1.2 1.2h17.2c.7 0 1.2-.5 1.2-1.2v-1.6c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+          <div class="field-divider"></div>
+          <input type="tel" id="mobileInput" placeholder="Mobile Number or User ID" maxlength="10" inputmode="numeric" autocomplete="off" enterkeyhint="go">
+          <button class="field-suffix-btn" id="mobileClear" style="display:none;" onclick="clearMobile()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5l5 5m0-5l-5 5"/></svg>
+          </button>
+          <span class="spinner" id="mobileSpinner" style="display:none;">
+            <svg viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="8" stroke="#3F71EB" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="37.7 12.57"/>
+            </svg>
+          </span>
+          <svg class="field-verified" id="mobileVerifiedIcon" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" fill="#079A80"/>
+            <path d="M7.5 12.4l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div class="helper-row" id="mobileHelper">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3zm-1.1 14.2L7.4 12.7l1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3z"/></svg>
+          <span>We will check if your account already exists.</span>
+        </div>
+        <button class="try-another" id="tryAnotherBtn" style="display:none;" onclick="resetToMobileEntry()">Try another Number</button>
+      </div>
+
+      <div class="field-wrap result-block" id="passwordBlock">
+        <label class="field-label hide" id="pwLabel">Password</label>
+        <div class="field-box" id="pwBox">
+          <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
+          <div class="field-divider"></div>
+          <input type="password" id="pwInput" placeholder="Enter your Password" autocomplete="off" enterkeyhint="go">
+          <button class="field-suffix-btn" onclick="togglePw('pwInput', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="error-row" id="pwError" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v6M12 16.5v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          <span>Incorrect password. Please try again.</span>
+        </div>
+        <div class="link-row">
+          <button class="link-btn" onclick="goTo('screen-forgot')">Forgot password.</button>
+        </div>
+      </div>
+
+      <div class="result-block" id="noAccountBlock">
+        <div class="info-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div>
+            <p class="info-card-title">Let&rsquo;s open your Demat account.</p>
+            <p class="info-card-desc">Your mobile number is verified. Complete a few quick steps to open your TradeSmart account.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="spacer"></div>
+      <p class="legal-text" id="mobileLegal"><span>By proceeding, I agree to the </span><a href="#" onclick="return false;">T&amp;C</a><span> and </span><a href="#" onclick="return false;">Privacy policy</a></p>
+      <button class="btn" id="mobileContinue" disabled onclick="onMobilePrimaryClick()">Continue</button>
+    </section>
+
+    <!-- OTP -->
+    <section class="screen" id="screen-otp">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title" style="margin-bottom:12px;">Hey Aditya, Welcome back!</h1>
+      <p class="otp-subtext">Enter the OTP sent on your registered mobile number and email ID to login or enter the TOTP from your Authenticator App.</p>
+      <div class="otp-row" id="otpRow">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
+        <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="done">
+      </div>
+      <button class="resend" onclick="showToast('OTP resent.')">Resend Code</button>
+      <div class="spacer"></div>
+      <button class="btn" id="otpContinue" disabled onclick="onOtpConfirm()">Confirm OTP</button>
+    </section>
+
+    <!-- LOGIN WITH TEMPORARY PASSWORD -->
+    <section class="screen" id="screen-temp-login">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title">Hey Aditya, Welcome back!</h1>
+      <div class="field-group">
+        <div class="field-wrap">
+          <div class="field-box verified">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v1.6c0 .7.5 1.2 1.2 1.2h17.2c.7 0 1.2-.5 1.2-1.2v-1.6c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+            <div class="field-divider"></div>
+            <input type="text" id="templNumber" placeholder="Mobile Number or User ID" value="ABC12345" readonly>
+          </div>
+        </div>
+        <div class="field-wrap">
+          <div class="field-box" id="templPwBox">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
+            <div class="field-divider"></div>
+            <input type="password" id="templPwInput" placeholder="Enter your Password" autocomplete="off" enterkeyhint="go">
+            <button class="field-suffix-btn" onclick="togglePw('templPwInput', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="link-row">
+            <button class="link-btn" onclick="goTo('screen-forgot')">Forgot password.</button>
+          </div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="templContinue" disabled onclick="onTemplLoginContinue()">Continue</button>
+    </section>
+
+    <!-- FORGOT PASSWORD -->
+    <section class="screen" id="screen-forgot">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title">Lets reset your Password!</h1>
+      <div class="field-group">
+        <div class="field-wrap">
+          <div class="field-box">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v1.6c0 .7.5 1.2 1.2 1.2h17.2c.7 0 1.2-.5 1.2-1.2v-1.6c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+            <div class="field-divider"></div>
+            <input type="text" id="forgotUserId" placeholder="Enter your User ID" autocomplete="off" enterkeyhint="next">
+          </div>
+        </div>
+        <div class="field-wrap">
+          <div class="field-box">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 10h6M13 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <div class="field-divider"></div>
+            <input type="text" id="forgotPan" placeholder="Enter your PAN Number" autocomplete="off" style="text-transform:uppercase;" enterkeyhint="go">
+          </div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn" id="forgotContinue" disabled onclick="onForgotContinue()">Continue</button>
+    </section>
+
+    <!-- TEMP PASSWORD SENT -->
+    <section class="screen" id="screen-temp-sent">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title">Lets reset your Password!</h1>
+      <div class="field-group">
+        <div class="field-wrap">
+          <label class="field-label">User ID</label>
+          <div class="field-box verified">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.5c-3.3 0-9.8 1.6-9.8 4.9v1.6c0 .7.5 1.2 1.2 1.2h17.2c.7 0 1.2-.5 1.2-1.2v-1.6c0-3.3-6.5-4.9-9.8-4.9z"/></svg>
+            <div class="field-divider"></div>
+            <input type="text" id="sentUserId" readonly style="font-weight:600;color:var(--grey-333);">
+          </div>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">PAN Number</label>
+          <div class="field-box verified">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 10h6M13 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <div class="field-divider"></div>
+            <input type="text" id="sentPan" readonly style="font-weight:600;color:var(--grey-333);">
+          </div>
+        </div>
+        <div class="info-card">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div>
+            <p class="info-card-title">Temporary Password Sent!</p>
+            <p class="info-card-desc">We&rsquo;ve sent a temporary password to your registered email and mobile number. Please use it to log in and reset your password.</p>
+          </div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn enabled" onclick="goToTempLogin()">Login</button>
+    </section>
+
+    <!-- NEW PASSWORD -->
+    <section class="screen" id="screen-new-password">
+      <div class="brand-header">
+        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg>
+        <p class="brand-tagline">Stocks . Futures . Options . Commodities</p>
+      </div>
+      <h1 class="screen-title">Lets reset your Password!</h1>
+      <div class="field-group">
+        <div class="field-wrap">
+          <label class="field-label">Current Password</label>
+          <div class="field-box">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
+            <div class="field-divider"></div>
+            <input type="password" id="curPw" placeholder="Enter current Password" autocomplete="off" enterkeyhint="next">
+            <button class="field-suffix-btn" onclick="togglePw('curPw', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">New Password</label>
+          <div class="field-box">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
+            <div class="field-divider"></div>
+            <input type="password" id="newPw" placeholder="Enter New Password" autocomplete="off" oninput="validateNewPassword()" enterkeyhint="next">
+            <button class="field-suffix-btn" onclick="togglePw('newPw', this)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="checklist" id="checklist">
+          <div class="check-item" id="rule1"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Both Alpha and Numeric characters</span></div>
+          <div class="check-item" id="rule2"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Enter special character(s) only from (_@#$*)</span></div>
+          <div class="check-item" id="rule3"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Minimum 8 characters and maximum 12 characters.</span></div>
+          <div class="check-item" id="rule4"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Space not allowed.</span></div>
+          <div class="check-item" id="rule5"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>New password can&rsquo;t match last 3 passwords.</span></div>
+        </div>
+        <div class="field-wrap">
+          <label class="field-label">Confirm New Password</label>
+          <div class="field-box" id="confirmPwBox">
+            <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
+            <div class="field-divider"></div>
+            <input type="password" id="confirmPw" placeholder="Confirm New Password" autocomplete="off" oninput="validateNewPassword()" enterkeyhint="done">
+          </div>
+          <div class="error-row" id="confirmError" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 7v6M12 16.5v.1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            <span>Password do not match.</span>
+          </div>
+        </div>
+      </div>
+      <div class="spacer"></div>
+      <div class="btn-row">
+        <button class="btn btn-outline" onclick="restartFlow()">Cancel</button>
+        <button class="btn" id="saveChangesBtn" disabled onclick="onSaveChanges()">Save changes</button>
+      </div>
+    </section>
+
+    <!-- SUCCESS -->
+    <section class="screen" id="screen-success">
+      <div class="success-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>
+        <h2 id="successHeading">You&rsquo;re logged in!</h2>
+        <p id="successSub">This is where the TradeSmart dashboard would load. That's the end of this prototype.</p>
+        <button class="btn enabled" style="width:auto;padding:0 24px;margin-top:8px;" onclick="restartFlow()">Restart prototype</button>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute;">
+  <symbol id="logo-mark" viewBox="0 0 140 50">
+    <path d="M36.7424 48.8929C35.9506 48.8929 35.1589 48.6744 34.4492 48.2107C32.5108 46.9557 31.9375 44.3363 33.2207 42.3718L47.6075 20.2718C48.8632 18.3346 51.4839 17.7616 53.4496 19.044C55.3877 20.299 55.961 22.9183 54.678 24.8828L40.2912 46.9829C39.4723 48.2107 38.1346 48.8929 36.7424 48.8929Z" fill="#3F71EB"/>
+    <path d="M12.6643 32.3314C11.818 32.3314 10.9717 32.0859 10.2346 31.5675C8.32369 30.2307 7.88688 27.5841 9.22456 25.7014L21.7276 7.50299C23.0653 5.59309 25.7134 5.15655 27.597 6.49347C29.5079 7.8304 29.9448 10.477 28.6071 12.3596L16.104 30.558C15.285 31.704 14.0019 32.3314 12.6643 32.3314Z" fill="#E02B59"/>
+    <path d="M7.20445 15.5253C6.38548 15.5253 5.56651 15.2797 4.82942 14.7886C2.91847 13.479 2.42708 10.8597 3.73745 8.92251L8.43294 1.82865C9.7433 -0.0812379 12.364 -0.572352 14.3023 0.737286C16.2133 2.04692 16.7046 4.66621 15.3943 6.60338L10.6988 13.6972C9.87979 14.8977 8.54214 15.5253 7.20445 15.5253Z" fill="#EEB268"/>
+    <path d="M29.4804 33.8053C28.6886 33.8053 27.8972 33.587 27.1873 33.123C25.249 31.8408 24.6757 29.2489 25.9588 27.2844L42.0107 1.99197C43.2939 0.0548024 45.8873 -0.518163 47.8527 0.764189C49.7912 2.04654 50.3644 4.63854 49.0812 6.60299L33.0292 31.8953C32.2103 33.1505 30.8453 33.8053 29.4804 33.8053Z" fill="#00B48E"/>
+    <path d="M70.1018 9.0305V20.8991H66.4436V9.0305H61.748V5.78369H74.7971V9.0305H70.1018Z" fill="#151E34"/>
+    <path d="M85.7985 20.8991L83.0961 15.6605H80.2842V20.8991H76.626V5.78369H83.7238C87.4639 5.78369 89.4021 7.80271 89.4021 10.613C89.4021 12.8503 88.0099 14.3236 86.5902 14.9511L89.8388 20.8991H85.7985ZM83.6421 9.0305H80.2294V12.7684H83.6421C84.8158 12.7684 85.7167 12.059 85.7167 10.8858C85.744 9.65803 84.8158 9.0305 83.6421 9.0305Z" fill="#151E34"/>
+    <path d="M107.829 20.8991V5.78369H114.081C119.131 5.78369 121.834 9.05777 121.834 13.3414C121.834 17.625 119.131 20.8991 114.081 20.8991H107.829ZM114.108 17.6523C116.756 17.6523 118.121 15.9879 118.121 13.3141C118.121 10.6675 116.756 9.0032 114.108 9.0032H111.46V17.6796H114.108V17.6523Z" fill="#151E34"/>
+    <path d="M123.445 20.8991V5.78369H134.992V9.0305H127.048V11.5952H133.955V14.46H127.048V17.6796H135.211V20.8991H123.445Z" fill="#151E34"/>
+    <path d="M102.233 20.8991H106.274L100.704 5.78369H96.3366L90.7128 20.8991H94.6712L98.4386 8.78493L101.36 18.2252L102.233 20.8991Z" fill="#151E34"/>
+    <path d="M74.6061 30.5033L71.9035 32.1678C71.0025 30.8853 69.5556 30.3668 68.1088 30.3668C66.8256 30.3668 65.9249 30.8308 65.9249 31.813C65.9249 32.9043 67.3716 33.15 69.0096 33.45C72.1765 34.023 74.8791 34.9779 74.8791 38.0884C74.8791 40.9533 72.5587 43.1087 68.5183 43.1087C65.2424 43.1087 62.7035 41.717 61.5023 39.3161L64.3415 37.8154C65.3514 39.5343 66.9896 40.1618 68.6821 40.1618C70.2655 40.1618 71.3302 39.5616 71.3302 38.5793C71.3302 37.2971 69.856 37.0789 68.0541 36.7786C64.9695 36.2329 62.376 35.2507 62.376 32.0585C62.376 29.1936 64.751 27.4474 68.2453 27.4474C70.593 27.4202 73.0772 28.2661 74.6061 30.5033Z" fill="#151E34"/>
+    <path d="M90.5486 42.8082V31.5128L86.8632 42.8082H83.9423L80.2841 31.5945V42.8082H76.7625V27.6929H81.9766L85.4162 38.3063L88.8561 27.6929H94.0429V42.8082C94.0974 42.8082 90.5486 42.8082 90.5486 42.8082Z" fill="#151E34"/>
+    <path d="M121.233 42.8082L118.531 37.5698H115.719V42.8082H112.061V27.6929H119.186C122.926 27.6929 124.864 29.7118 124.864 32.5222C124.864 34.7594 123.472 36.2329 122.052 36.8604L125.301 42.8082C125.328 42.8082 121.233 42.8082 121.233 42.8082ZM119.104 30.9398H115.691V34.6777H119.104C120.278 34.6777 121.179 33.9682 121.179 32.795C121.179 31.5945 120.278 30.9398 119.104 30.9398Z" fill="#151E34"/>
+    <path d="M134.119 30.9398V42.8082H130.488V30.9398H125.792V27.6929H138.814V30.9398H134.119Z" fill="#151E34"/>
+    <path d="M106.792 42.8082H110.832L105.236 27.6929H100.923L95.2991 42.8082H99.2575L103.025 30.7215L105.946 40.1618L106.792 42.8082Z" fill="#151E34"/>
+  </symbol>
+</svg>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- state ---------------- */
+const state = { mobile:'', isNewUser:false, userId:'', pan:'', otpFlow:'' };
+let history = ['screen-splash'];
+
+function goTo(id, replace){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if(replace){ history[history.length-1] = id; } else { history.push(id); }
+  window.scrollTo(0,0);
+}
+
+function restartFlow(){
+  state.mobile=''; state.isNewUser=false; state.userId=''; state.pan=''; state.otpFlow='';
+  resetToMobileEntry();
+  document.querySelectorAll('.otp-box').forEach(b=>{b.value='';b.classList.remove('filled');});
+  document.getElementById('otpContinue').disabled = true;
+  document.getElementById('otpContinue').classList.remove('enabled');
+  document.getElementById('forgotUserId').value='';
+  document.getElementById('forgotPan').value='';
+  document.getElementById('forgotContinue').disabled = true;
+  document.getElementById('templPwInput').value='';
+  document.getElementById('curPw').value='';
+  document.getElementById('newPw').value='';
+  document.getElementById('confirmPw').value='';
+  validateNewPassword();
+  history = ['screen-splash'];
+  goTo('screen-splash', true);
+  setTimeout(()=>{ if(document.getElementById('screen-splash').classList.contains('active')) goTo('screen-mobile'); }, 1400);
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------------- splash auto-advance ---------------- */
+setTimeout(()=>{ goTo('screen-mobile'); }, 1400);
+
+/* ---------------- mobile number / verify / result (single morphing screen) ---------------- */
+const mobileInput = document.getElementById('mobileInput');
+const mobileBox = document.getElementById('mobileBox');
+const mobileLabel = document.getElementById('mobileLabel');
+const mobileClear = document.getElementById('mobileClear');
+const mobileSpinner = document.getElementById('mobileSpinner');
+const mobileVerifiedIcon = document.getElementById('mobileVerifiedIcon');
+const mobileContinue = document.getElementById('mobileContinue');
+const mobileHeading = document.getElementById('mobileHeading');
+const mobileHelper = document.getElementById('mobileHelper');
+const mobileLegal = document.getElementById('mobileLegal');
+const tryAnotherBtn = document.getElementById('tryAnotherBtn');
+const passwordBlock = document.getElementById('passwordBlock');
+const noAccountBlock = document.getElementById('noAccountBlock');
+const pwInput = document.getElementById('pwInput');
+const pwBox = document.getElementById('pwBox');
+const pwLabel = document.getElementById('pwLabel');
+
+let mobileStep = 'entry'; // entry | verifying | password | no-account
+
+function updateMobileLabel(){
+  const show = document.activeElement === mobileInput || mobileInput.value.length>0;
+  mobileLabel.classList.toggle('hide', !show);
+}
+mobileInput.addEventListener('input', ()=>{
+  mobileInput.value = mobileInput.value.replace(/\D/g,'');
+  mobileClear.style.display = mobileInput.value.length ? 'flex' : 'none';
+  const valid = mobileInput.value.length === 10;
+  mobileContinue.disabled = !valid;
+  mobileContinue.classList.toggle('enabled', valid);
+  updateMobileLabel();
+});
+mobileInput.addEventListener('focus', updateMobileLabel);
+mobileInput.addEventListener('blur', updateMobileLabel);
+
+function clearMobile(){
+  mobileInput.value=''; mobileClear.style.display='none';
+  mobileContinue.disabled = true; mobileContinue.classList.remove('enabled');
+  updateMobileLabel();
+  mobileInput.focus();
+}
+
+function updatePwLabel(){
+  const show = document.activeElement === pwInput || pwInput.value.length>0;
+  pwLabel.classList.toggle('hide', !show);
+}
+pwInput.addEventListener('input', ()=>{
+  pwBox.classList.remove('err'); pwLabel.classList.remove('err');
+  document.getElementById('pwError').style.display='none';
+  updatePwLabel();
+  const valid = pwInput.value.length>0;
+  mobileContinue.disabled = !valid;
+  mobileContinue.classList.toggle('enabled', valid);
+});
+pwInput.addEventListener('focus', updatePwLabel);
+pwInput.addEventListener('blur', updatePwLabel);
+
+function togglePw(id, btn){
+  const el = document.getElementById(id);
+  const isPw = el.type === 'password';
+  el.type = isPw ? 'text' : 'password';
+  btn.querySelector('svg').innerHTML = isPw
+    ? '<path d="M3 3l18 18" stroke-linecap="round"/><path d="M9.9 5.1A10.6 10.6 0 0112 5c6.5 0 10 7 10 7a17.7 17.7 0 01-3.3 4.3M6.3 6.3A17.6 17.6 0 002 12s3.5 7 10 7c1.4 0 2.7-.3 3.8-.8"/><path d="M9.5 9.5a3 3 0 004 4"/>'
+    : '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>';
+}
+
+function resetToMobileEntry(){
+  mobileStep = 'entry';
+  mobileInput.readOnly = false;
+  mobileInput.value = '';
+  mobileClear.style.display='none';
+  mobileSpinner.style.display='none';
+  mobileVerifiedIcon.style.display='none';
+  mobileBox.classList.remove('verified');
+  updateMobileLabel();
+  mobileHeading.textContent = "Let\u2019s get started!";
+  mobileHelper.style.display='flex';
+  tryAnotherBtn.style.display='none';
+  mobileLegal.style.display='block';
+  passwordBlock.classList.remove('show');
+  noAccountBlock.classList.remove('show');
+  mobileContinue.textContent = 'Continue';
+  mobileContinue.onclick = onMobilePrimaryClick;
+  mobileContinue.disabled = true;
+  mobileContinue.classList.remove('enabled');
+  pwInput.value='';
+  pwBox.classList.remove('err');
+  pwLabel.classList.remove('err');
+  pwLabel.classList.add('hide');
+  document.getElementById('pwError').style.display='none';
+}
+
+function onMobilePrimaryClick(){
+  if(mobileStep === 'entry'){
+    startVerifying();
+  } else if(mobileStep === 'password'){
+    onPasswordContinue();
+  } else if(mobileStep === 'no-account'){
+    showToast('This would continue into account opening — outside this prototype.');
+  }
+}
+
+function startVerifying(){
+  mobileStep = 'verifying';
+  state.mobile = mobileInput.value;
+  mobileInput.readOnly = true;
+  mobileClear.style.display = 'none';
+  mobileSpinner.style.display = 'flex';
+  mobileContinue.disabled = true;
+  mobileContinue.classList.add('enabled');
+  setTimeout(showVerifyResult, 1700);
+}
+
+function showVerifyResult(){
+  mobileSpinner.style.display = 'none';
+  mobileVerifiedIcon.style.display = 'flex';
+  mobileBox.classList.add('verified');
+  mobileHelper.style.display = 'none';
+  state.isNewUser = (state.mobile === '9999999999');
+  if(state.isNewUser){
+    mobileStep = 'no-account';
+    mobileHeading.textContent = 'Welcome to TradeSmart!';
+    tryAnotherBtn.style.display='block';
+    mobileLegal.style.display='block';
+    noAccountBlock.classList.add('show');
+    mobileContinue.textContent = 'Open your Account';
+    mobileContinue.disabled = false;
+    mobileContinue.classList.add('enabled');
+  } else {
+    mobileStep = 'password';
+    mobileHeading.textContent = 'Hey Aditya, Welcome back!';
+    tryAnotherBtn.style.display='none';
+    mobileLegal.style.display='none';
+    passwordBlock.classList.add('show');
+    mobileContinue.textContent = 'Continue';
+    mobileContinue.disabled = true;
+    mobileContinue.classList.remove('enabled');
+    setTimeout(()=>pwInput.focus(), 400);
+  }
+}
+
+function onPasswordContinue(){
+  if(pwInput.value.trim().toLowerCase() !== 'wrong'){
+    document.querySelectorAll('.otp-box').forEach((b)=>{ b.value=''; b.classList.remove('filled'); });
+    document.getElementById('otpContinue').disabled = true;
+    document.getElementById('otpContinue').classList.remove('enabled');
+    state.otpFlow = 'login';
+    goTo('screen-otp');
+    setTimeout(()=>{ document.querySelector('.otp-box').focus(); }, 350);
+  } else {
+    pwBox.classList.add('err'); pwLabel.classList.add('err');
+    pwLabel.classList.remove('hide');
+    document.getElementById('pwError').style.display='flex';
+  }
+}
+
+/* ---------------- generic "keyboard next/go key acts like the button" helper ---------------- */
+function onEnterKey(el, handler){
+  el.addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      handler();
+    }
+  });
+}
+
+onEnterKey(mobileInput, ()=>{ if(!mobileContinue.disabled) mobileContinue.click(); });
+onEnterKey(pwInput, ()=>{ if(!mobileContinue.disabled) mobileContinue.click(); });
+
+/* ---------------- OTP screen ---------------- */
+const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+const otpContinue = document.getElementById('otpContinue');
+otpBoxes.forEach((box, i)=>{
+  box.addEventListener('input', ()=>{
+    box.value = box.value.replace(/\D/g,'').slice(0,1);
+    box.classList.toggle('filled', box.value.length>0);
+    if(box.value){
+      box.classList.remove('bounce');
+      void box.offsetWidth; // restart animation
+      box.classList.add('bounce');
+      if(otpBoxes[i+1]) otpBoxes[i+1].focus();
+    }
+    checkOtpComplete();
+  });
+  box.addEventListener('animationend', ()=>box.classList.remove('bounce'));
+  box.addEventListener('keydown', (e)=>{
+    if(e.key === 'Backspace' && !box.value && otpBoxes[i-1]) otpBoxes[i-1].focus();
+    if(e.key === 'Enter'){
+      e.preventDefault();
+      if(!otpContinue.disabled){ otpContinue.click(); }
+      else if(otpBoxes[i+1]){ otpBoxes[i+1].focus(); }
+    }
+  });
+});
+function checkOtpComplete(){
+  const complete = otpBoxes.every(b=>b.value.length===1);
+  otpContinue.disabled = !complete;
+  otpContinue.classList.toggle('enabled', complete);
+}
+function onOtpConfirm(){
+  if(state.otpFlow === 'temp-reset'){
+    document.getElementById('curPw').value='';
+    document.getElementById('newPw').value='';
+    document.getElementById('confirmPw').value='';
+    validateNewPassword();
+    goTo('screen-new-password');
+  } else {
+    document.getElementById('successHeading').textContent = "You're logged in!";
+    document.getElementById('successSub').textContent = "This is where the TradeSmart dashboard would load. That's the end of this prototype.";
+    goTo('screen-success');
+  }
+}
+
+/* ---------------- forgot password screen ---------------- */
+const forgotUserId = document.getElementById('forgotUserId');
+const forgotPan = document.getElementById('forgotPan');
+const forgotContinue = document.getElementById('forgotContinue');
+function checkForgot(){
+  const valid = forgotUserId.value.trim().length>0 && forgotPan.value.trim().length>0;
+  forgotContinue.disabled = !valid;
+  forgotContinue.classList.toggle('enabled', valid);
+}
+forgotUserId.addEventListener('input', checkForgot);
+forgotPan.addEventListener('input', ()=>{ forgotPan.value = forgotPan.value.toUpperCase(); checkForgot(); });
+onEnterKey(forgotUserId, ()=>forgotPan.focus());
+onEnterKey(forgotPan, ()=>{ if(!forgotContinue.disabled) forgotContinue.click(); });
+
+function onForgotContinue(){
+  state.userId = forgotUserId.value.trim();
+  state.pan = forgotPan.value.trim();
+  document.getElementById('sentUserId').value = state.userId;
+  document.getElementById('sentPan').value = state.pan;
+  goTo('screen-temp-sent');
+}
+
+function goToTempLogin(){
+  document.getElementById('templNumber').value = state.userId || 'ABC12345';
+  document.getElementById('templPwInput').value='';
+  document.getElementById('templContinue').disabled = true;
+  document.getElementById('templContinue').classList.remove('enabled');
+  goTo('screen-temp-login');
+}
+
+/* ---------------- temp login screen ---------------- */
+const templPwInput = document.getElementById('templPwInput');
+const templContinue = document.getElementById('templContinue');
+templPwInput.addEventListener('input', ()=>{
+  const valid = templPwInput.value.length>0;
+  templContinue.disabled = !valid;
+  templContinue.classList.toggle('enabled', valid);
+});
+onEnterKey(templPwInput, ()=>{ if(!templContinue.disabled) templContinue.click(); });
+function onTemplLoginContinue(){
+  document.querySelectorAll('.otp-box').forEach((b)=>{ b.value=''; b.classList.remove('filled'); });
+  document.getElementById('otpContinue').disabled = true;
+  document.getElementById('otpContinue').classList.remove('enabled');
+  state.otpFlow = 'temp-reset';
+  goTo('screen-otp');
+  setTimeout(()=>{ document.querySelector('.otp-box').focus(); }, 350);
+}
+
+/* ---------------- new password screen ---------------- */
+function validateNewPassword(){
+  const pw = document.getElementById('newPw').value;
+  const confirm = document.getElementById('confirmPw').value;
+  const curPw = document.getElementById('curPw').value;
+  const typed = pw.length>0;
+
+  const hasAlpha = /[a-zA-Z]/.test(pw);
+  const hasNumeric = /[0-9]/.test(pw);
+  const r1 = hasAlpha && hasNumeric;
+  const r2 = /^[A-Za-z0-9_@#$*]*$/.test(pw);
+  const r3 = pw.length>=8 && pw.length<=12;
+  const r4 = !/\s/.test(pw);
+  const r5 = true; // best-effort: can't check real history in a prototype
+
+  setRule('rule1', tri(typed, r1)); setRule('rule2', tri(typed, r2)); setRule('rule3', tri(typed, r3));
+  setRule('rule4', tri(typed, r4)); setRule('rule5', tri(typed, r5));
+
+  const allOk = r1 && r2 && r3 && r4 && r5;
+  const confirmBox = document.getElementById('confirmPwBox');
+  const confirmError = document.getElementById('confirmError');
+  let matches = true;
+  if(confirm.length>0){
+    matches = (confirm === pw);
+    confirmBox.classList.toggle('err', !matches);
+    confirmError.style.display = matches ? 'none' : 'flex';
+  } else {
+    confirmBox.classList.remove('err');
+    confirmError.style.display = 'none';
+  }
+
+  const canSave = typed && allOk && curPw.length>0 && confirm.length>0 && matches;
+  const saveBtn = document.getElementById('saveChangesBtn');
+  saveBtn.disabled = !canSave;
+  saveBtn.classList.toggle('enabled', canSave);
+}
+function tri(typed, passed){
+  return !typed ? 'neutral' : (passed ? 'ok' : 'fail');
+}
+function setRule(id, status){
+  const el = document.getElementById(id);
+  el.classList.remove('ok','fail');
+  if(status==='ok') el.classList.add('ok');
+  else if(status==='fail') el.classList.add('fail');
+}
+document.getElementById('curPw').addEventListener('input', validateNewPassword);
+const curPwEl = document.getElementById('curPw');
+const newPwEl = document.getElementById('newPw');
+const confirmPwEl = document.getElementById('confirmPw');
+const saveChangesBtnEl = document.getElementById('saveChangesBtn');
+onEnterKey(curPwEl, ()=>newPwEl.focus());
+onEnterKey(newPwEl, ()=>confirmPwEl.focus());
+onEnterKey(confirmPwEl, ()=>{ if(!saveChangesBtnEl.disabled) saveChangesBtnEl.click(); });
+
+function onSaveChanges(){
+  document.getElementById('successHeading').textContent = 'Password updated!';
+  document.getElementById('successSub').textContent = "You're now logged in with your new password. That's the end of this prototype.";
+  goTo('screen-success');
+}
+</script>
+<script>
+  // The service worker is intentionally best-effort so the prototype still works from a file preview.
+  if ('serviceWorker' in navigator && (location.protocol === 'http:' || location.protocol === 'https:')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js'));
+  }
+</script>
+</body>
+</html>

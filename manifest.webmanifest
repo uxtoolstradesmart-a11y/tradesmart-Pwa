@@ -1,0 +1,15 @@
+{
+  "name": "TradeSmart — Login Flow Prototype",
+  "short_name": "TradeSmart",
+  "description": "A standalone TradeSmart login flow prototype.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    { "src": "./icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
