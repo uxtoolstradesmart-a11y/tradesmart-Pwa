@@ -154,7 +154,8 @@
     color:var(--grey-333); letter-spacing:0.28px; background:transparent; height:100%;
   }
   .field-box input::placeholder{font-weight:400; color:var(--grey-777);}
-  #forgotPan::placeholder{text-transform:none;}
+  #forgotPan::placeholder{text-transform:none !important;}
+  #forgotPan::-webkit-input-placeholder{text-transform:none !important;}
   .field-suffix-btn{flex:none; width:20px;height:20px; background:none; border:none; padding:0; cursor:pointer; color:var(--grey-777); display:flex;align-items:center;justify-content:center;}
   .field-suffix-btn svg{width:20px;height:20px;}
   .field-verified{width:20px;height:20px;flex:none; display:none;}
@@ -513,7 +514,7 @@
             <div class="field-box">
             <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="2" y="5" width="20" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M13 10h6M13 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
             <div class="field-divider"></div>
-            <input type="text" id="forgotPan" placeholder="Enter your PAN number" autocomplete="off" enterkeyhint="go">
+            <input type="text" id="forgotPan" placeholder="Enter your pan number" autocomplete="off" enterkeyhint="go">
           </div>
         </div>
       </div>
