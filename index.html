@@ -292,10 +292,11 @@
   }
   .otp-box.bounce{ animation:otpBounce .28s cubic-bezier(.34,1.2,.64,1); }
   .resend{
-    display:block; text-align:center; margin:12px auto 0; font-size:14px;
+    display:block; min-height:22px; text-align:center; margin:22px auto 0; font-size:16px;
     font-weight:500; color:var(--blue); background:none; border:none; cursor:pointer;
     font-family:'Roboto',sans-serif;
   }
+  .resend:disabled{color:var(--grey-777); cursor:default;}
   .otp-subtext{font-size:16px; line-height:22px; color:var(--grey-555); margin:12px 0 0;}
 
   /* ---------- checklist ---------- */
@@ -455,7 +456,7 @@
         <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="next">
         <input class="otp-box" maxlength="1" inputmode="numeric" enterkeyhint="done">
       </div>
-      <button class="resend" onclick="showToast('OTP resent.')">Resend Code</button>
+      <button class="resend" id="resendOtpBtn" onclick="onResendOtp()" disabled>Resend Code in 59 sec</button>
       <div class="spacer"></div>
       <button class="btn" id="otpContinue" disabled onclick="onOtpConfirm()">Confirm OTP</button>
     </section>
@@ -657,6 +658,7 @@ function goTo(id, replace){
   document.getElementById(id).classList.add('active');
   if(replace){ history[history.length-1] = id; } else { history.push(id); }
   window.scrollTo(0,0);
+  if(id === 'screen-otp') startOtpCountdown();
 }
 
 function restartFlow(){
@@ -888,6 +890,32 @@ onEnterKey(pwInput, ()=>{ if(!mobileContinue.disabled) mobileContinue.click(); }
 /* ---------------- OTP screen ---------------- */
 const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
 const otpContinue = document.getElementById('otpContinue');
+const resendOtpBtn = document.getElementById('resendOtpBtn');
+let otpResendTimer;
+
+function startOtpCountdown(){
+  clearInterval(otpResendTimer);
+  let secondsLeft = 59;
+  resendOtpBtn.disabled = true;
+  resendOtpBtn.textContent = `Resend Code in ${secondsLeft} sec`;
+  otpResendTimer = setInterval(()=>{
+    secondsLeft -= 1;
+    if(secondsLeft <= 0){
+      clearInterval(otpResendTimer);
+      resendOtpBtn.disabled = false;
+      resendOtpBtn.textContent = 'Resend Code';
+      return;
+    }
+    resendOtpBtn.textContent = `Resend Code in ${secondsLeft} sec`;
+  }, 1000);
+}
+
+function onResendOtp(){
+  if(resendOtpBtn.disabled) return;
+  showToast('OTP resent.');
+  startOtpCountdown();
+}
+
 otpBoxes.forEach((box, i)=>{
   box.addEventListener('input', ()=>{
     box.value = box.value.replace(/\D/g,'').slice(0,1);
