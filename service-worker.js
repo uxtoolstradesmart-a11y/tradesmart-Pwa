@@ -1,4 +1,4 @@
-const CACHE = 'tradesmart-login-pwa-v18';
+const CACHE = 'tradesmart-login-pwa-v19';
 const APP_SHELL = [
   './',
   './index.html',
