@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<!--
+  TradeSmart — Pre-login intro / splash mark  (v2 — more dynamics)
+  ------------------------------------------------------------------
+  Self-contained, zero-dependency (no JS, no GSAP, no Lottie).
+  Paints instantly on first launch — no library-load flash.
+
+  MOTION DESIGN
+   • Entrance (once): each badge arcs in from its own direction with a
+     slight rotation, overshoots, then settles. Staggered blue→teal→amber.
+   • Float (infinite): each badge drifts along its OWN looping path (a slow
+     organic meander, not a synced bob). Amplitude encodes depth — large
+     blue moves most ("closest"), amber least ("farthest").
+   • Specular glint: a soft highlight sweeps across each disc on a staggered
+     rhythm, clipped to the disc — the "light catching glass" premium touch.
+   • Halo breathe: soft outer rings gently scale + fade, off-phase.
+   • Colour-matched drop-shadows give ambient depth (no UI element added).
+
+  ANGULAR HANDOFF
+   • Drop <svg.mark> into the component template; move <style> into the
+     component .css (scoped to .stage / .mark).
+   • Background lives on .stage. Set .stage{background:transparent} to overlay
+     on your own splash, or flip --bg-1/--bg-2 (dark preset commented below).
+   • Tune feel via the float*/glint*/breathe keyframes near the bottom.
+   • prefers-reduced-motion respected (static, fully visible at rest).
+   • Decorative mark: role="img" + aria-label; swap to aria-hidden="true" if a
+     separate text logo carries the accessible name.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TradeSmart — Intro</title>
+<style>
+  :root{
+    /* Light premium backdrop (default) */
+    --bg-1:#ffffff;
+    --bg-2:#eef1f6;
+
+    /* Dark preset — uncomment to use:
+    --bg-1:#0e1320;
+    --bg-2:#070a12;
+    */
+
+    --ease-settle:cubic-bezier(.34,1.46,.44,1); /* gentle overshoot */
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; height:100%; }
+
+  .stage{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    background:transparent;
+    overflow:hidden;
+  }
+
+  .mark{
+    width:clamp(184px, 42vw, 300px);
+    height:auto;
+    overflow:visible;                 /* let float + glow spill past the box */
+  }
+
+  .mark *{ transform-box:fill-box; }
+  .enter, .bob, .halo, .glint{ transform-origin:50% 50%; }
+  .glint{ opacity:0; }                 /* stays hidden until its own sweep begins */
+
+  /* Ambient depth — colour-matched soft shadows (static) */
+  .bob--teal  { filter:drop-shadow(0 6px 13px rgba(0,180,142,.30)); }
+  .bob--amber { filter:drop-shadow(0 5px 11px rgba(224,170,90,.34)); }
+  .bob--blue  { filter:drop-shadow(0 9px 20px rgba(63,113,235,.34)); }
+
+  /* ---------- Entrance (once) — kinetic arc-in ---------- */
+  @keyframes enterBlue{
+    0%   { opacity:0; transform:translateY(28px) scale(.66) rotate(5deg); }
+    55%  { opacity:1; }
+    100% { opacity:1; transform:translateY(0) scale(1) rotate(0); }
+  }
+  @keyframes enterTeal{
+    0%   { opacity:0; transform:translate(-24px,12px) scale(.66) rotate(-8deg); }
+    55%  { opacity:1; }
+    100% { opacity:1; transform:translate(0,0) scale(1) rotate(0); }
+  }
+  @keyframes enterAmber{
+    0%   { opacity:0; transform:translate(22px,-10px) scale(.64) rotate(9deg); }
+    55%  { opacity:1; }
+    100% { opacity:1; transform:translate(0,0) scale(1) rotate(0); }
+  }
+  .enter--blue  { animation:enterBlue  1s var(--ease-settle) .05s both; }
+  .enter--teal  { animation:enterTeal  1s var(--ease-settle) .20s both; }
+  .enter--amber { animation:enterAmber 1s var(--ease-settle) .35s both; }
+
+  /* ---------- Continuous float — organic looping drift ---------- */
+  @keyframes floatBlue{
+    0%   { transform:translate(0,0)       rotate(0); }
+    22%  { transform:translate(4px,-6px)  rotate(-1deg); }
+    46%  { transform:translate(-3px,-8px) rotate(.6deg); }
+    68%  { transform:translate(-5px,2px)  rotate(1deg); }
+    86%  { transform:translate(3px,6px)   rotate(-.5deg); }
+    100% { transform:translate(0,0)       rotate(0); }
+  }
+  @keyframes floatTeal{
+    0%   { transform:translate(0,0)       rotate(0); }
+    20%  { transform:translate(-3px,4px)  rotate(.8deg); }
+    44%  { transform:translate(2px,6px)   rotate(-.6deg); }
+    64%  { transform:translate(4px,-2px)  rotate(-1deg); }
+    84%  { transform:translate(-2px,-5px) rotate(.6deg); }
+    100% { transform:translate(0,0)       rotate(0); }
+  }
+  @keyframes floatAmber{
+    0%   { transform:translate(0,0)         rotate(0); }
+    24%  { transform:translate(2px,3px)     rotate(-.6deg); }
+    48%  { transform:translate(-2.5px,3.5px) rotate(.5deg); }
+    70%  { transform:translate(-3px,-2px)   rotate(.8deg); }
+    88%  { transform:translate(1.5px,-3px)  rotate(-.5deg); }
+    100% { transform:translate(0,0)         rotate(0); }
+  }
+  .bob--blue  { animation:floatBlue  11s ease-in-out -2s infinite; }
+  .bob--teal  { animation:floatTeal  9.5s ease-in-out -5s infinite; }
+  .bob--amber { animation:floatAmber 13s ease-in-out -1s infinite; }
+
+  /* ---------- Halo breathe (off-phase) ---------- */
+  @keyframes breathe{
+    from{ transform:scale(1);    opacity:.5; }
+    to  { transform:scale(1.07); opacity:.32; }
+  }
+  .halo--blue  { animation:breathe 5.5s ease-in-out  0s   infinite alternate; }
+  .halo--teal  { animation:breathe 4.7s ease-in-out -1.0s infinite alternate; }
+  .halo--amber { animation:breathe 6.3s ease-in-out -2.0s infinite alternate; }
+
+  /* ---------- Specular glint — staggered sweep, clipped to disc ---------- */
+  @keyframes glintBlue{
+    0%   { transform:translateX(-82px) rotate(20deg); opacity:0; }
+    3%   { opacity:.9; }
+    12%  { transform:translateX(96px)  rotate(20deg); opacity:.9; }
+    15%  { transform:translateX(96px)  rotate(20deg); opacity:0; }
+    100% { transform:translateX(96px)  rotate(20deg); opacity:0; }
+  }
+  @keyframes glintTeal{
+    0%   { transform:translateX(-60px) rotate(20deg); opacity:0; }
+    3%   { opacity:.9; }
+    12%  { transform:translateX(72px)  rotate(20deg); opacity:.9; }
+    15%  { transform:translateX(72px)  rotate(20deg); opacity:0; }
+    100% { transform:translateX(72px)  rotate(20deg); opacity:0; }
+  }
+  @keyframes glintAmber{
+    0%   { transform:translateX(-46px) rotate(20deg); opacity:0; }
+    3%   { opacity:.9; }
+    12%  { transform:translateX(56px)  rotate(20deg); opacity:.9; }
+    15%  { transform:translateX(56px)  rotate(20deg); opacity:0; }
+    100% { transform:translateX(56px)  rotate(20deg); opacity:0; }
+  }
+  .glint--blue  { animation:glintBlue  9s ease-in-out 1.5s infinite backwards; }
+  .glint--teal  { animation:glintTeal  9s ease-in-out 4.5s infinite backwards; }
+  .glint--amber { animation:glintAmber 9s ease-in-out 7.5s infinite backwards; }
+
+  /* ---------- Accessibility: respect reduced motion ---------- */
+  @media (prefers-reduced-motion: reduce){
+    .enter, .bob, .halo, .glint{ animation:none !important; }
+    .enter{ opacity:1; transform:none; }
+    .glint{ opacity:0; }
+  }
+</style>
+</head>
+<body>
+  <div class="stage">
+    <svg class="mark" viewBox="0 0 201 237" fill="none"
+         xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-label="TradeSmart">
+      <defs>
+        <linearGradient id="glintGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0"   stop-color="#fff" stop-opacity="0"/>
+          <stop offset="0.5" stop-color="#fff" stop-opacity="0.5"/>
+          <stop offset="1"   stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <clipPath id="discTeal"><circle cx="46.5" cy="69.5" r="40.38"/></clipPath>
+        <clipPath id="discAmber"><circle cx="165.5" cy="35.5" r="30.83"/></clipPath>
+        <clipPath id="discBlue"><circle cx="120" cy="172" r="56.45"/></clipPath>
+      </defs>
+
+      <!-- TEAL badge -->
+      <g class="enter enter--teal">
+        <g class="bob bob--teal">
+          <path class="halo halo--teal" opacity="0.5" fill="#00B48E"
+            d="M46.3712 115.966C71.9813 115.966 92.7424 95.1551 92.7424 69.4832C92.7424 43.8112 71.9813 23 46.3712 23C20.7611 23 0 43.8112 0 69.4832C0 95.1551 20.7611 115.966 46.3712 115.966Z"/>
+          <path fill="#00B48E"
+            d="M46.5002 109.882C68.8024 109.882 86.8818 91.8024 86.8818 69.5002C86.8818 47.1981 68.8024 29.1187 46.5002 29.1187C24.1981 29.1187 6.11865 47.1981 6.11865 69.5002C6.11865 91.8024 24.1981 109.882 46.5002 109.882Z"/>
+          <g clip-path="url(#discTeal)">
+            <rect class="glint glint--teal" x="37.5" y="22" width="17" height="96" fill="url(#glintGrad)"/>
+          </g>
+          <path fill="#fff"
+            d="M29.1969 52.0744C29.1969 50.2422 30.6546 48.762 32.459 48.762H58.5558C60.3602 48.762 61.8179 50.2422 61.8179 52.0744C61.8179 53.9067 60.3602 55.3869 58.5558 55.3869H52.8267C53.8054 56.8775 54.5292 58.5545 54.9369 60.3556H58.566C60.3704 60.3556 61.8281 61.8359 61.8281 63.6681C61.8281 65.5003 60.3704 66.9806 58.566 66.9806H54.9369C53.5913 73.0155 48.6268 77.6633 42.4798 78.4604L57.1898 89.1328C58.6578 90.199 58.9942 92.2693 57.9442 93.7496C56.8942 95.2298 54.8554 95.5818 53.3976 94.5156L30.5629 77.9532C29.411 77.1251 28.9216 75.6241 29.3498 74.2474C29.7779 72.8706 31.042 71.9493 32.459 71.9493H40.6142C43.9579 71.9493 46.8326 69.9101 48.0865 66.9806H32.459C30.6546 66.9806 29.1969 65.5003 29.1969 63.6681C29.1969 61.8359 30.6546 60.3556 32.459 60.3556H48.0865C46.8326 57.4262 43.9579 55.3869 40.6142 55.3869H32.459C30.6546 55.3869 29.1969 53.9067 29.1969 52.0744Z"/>
+        </g>
+      </g>
+
+      <!-- AMBER badge -->
+      <g class="enter enter--amber">
+        <g class="bob bob--amber">
+          <path class="halo halo--amber" opacity="0.5" fill="#EEB268"
+            d="M165.402 70.9743C184.953 70.9743 200.803 55.0862 200.803 35.4871C200.803 15.8881 184.953 0 165.402 0C145.85 0 130 15.8881 130 35.4871C130 55.0862 145.85 70.9743 165.402 70.9743Z"/>
+          <path fill="#EEB268"
+            d="M165.5 66.3288C182.526 66.3288 196.329 52.5262 196.329 35.4998C196.329 18.4735 182.526 4.6709 165.5 4.6709C148.473 4.6709 134.671 18.4735 134.671 35.4998C134.671 52.5262 148.473 66.3288 165.5 66.3288Z"/>
+          <g clip-path="url(#discAmber)">
+            <rect class="glint glint--amber" x="158" y="2.5" width="13" height="66" fill="url(#glintGrad)"/>
+          </g>
+          <path fill="#fff"
+            d="M152.29 22.1964C152.29 20.7976 153.403 19.6675 154.781 19.6675H174.704C176.082 19.6675 177.195 20.7976 177.195 22.1964C177.195 23.5952 176.082 24.7252 174.704 24.7252H170.33C171.077 25.8632 171.63 27.1435 171.941 28.5186H174.712C176.089 28.5186 177.202 29.6487 177.202 31.0475C177.202 32.4462 176.089 33.5763 174.712 33.5763H171.941C170.914 38.1836 167.124 41.732 162.431 42.3405L173.661 50.4882C174.782 51.3022 175.039 52.8828 174.237 54.0129C173.436 55.143 171.879 55.4117 170.766 54.5977L153.333 41.9533C152.454 41.321 152.08 40.1751 152.407 39.1241C152.734 38.073 153.699 37.3697 154.781 37.3697H161.007C163.559 37.3697 165.754 35.8128 166.711 33.5763H154.781C153.403 33.5763 152.29 32.4462 152.29 31.0475C152.29 29.6487 153.403 28.5186 154.781 28.5186H166.711C165.754 26.2821 163.559 24.7252 161.007 24.7252H154.781C153.403 24.7252 152.29 23.5952 152.29 22.1964Z"/>
+        </g>
+      </g>
+
+      <!-- BLUE badge (hero — reads ₹12) -->
+      <g class="enter enter--blue">
+        <g class="bob bob--blue">
+          <path class="halo halo--blue" opacity="0.5" fill="#3F71EB"
+            d="M119.82 236.953C155.619 236.953 184.64 207.862 184.64 171.976C184.64 136.091 155.619 107 119.82 107C84.0209 107 55 136.091 55 171.976C55 207.862 84.0209 236.953 119.82 236.953Z"/>
+          <path fill="#3F71EB"
+            d="M120 228.447C151.175 228.447 176.447 203.175 176.447 172C176.447 140.825 151.175 115.553 120 115.553C88.8251 115.553 63.5527 140.825 63.5527 172C63.5527 203.175 88.8251 228.447 120 228.447Z"/>
+          <g clip-path="url(#discBlue)">
+            <rect class="glint glint--blue" x="109" y="96" width="22" height="152" fill="url(#glintGrad)"/>
+          </g>
+          <path fill="#fff"
+            d="M82.542 156.235C82.542 154.806 83.6966 153.652 85.1257 153.652H105.795C107.224 153.652 108.379 154.806 108.379 156.235C108.379 157.664 107.224 158.819 105.795 158.819H101.257C102.033 159.982 102.606 161.29 102.929 162.694H105.803C107.232 162.694 108.387 163.849 108.387 165.278C108.387 166.707 107.232 167.862 105.803 167.862H102.929C101.863 172.569 97.931 176.194 93.0624 176.816L104.713 185.14C105.876 185.972 106.142 187.586 105.311 188.741C104.479 189.896 102.864 190.17 101.71 189.338L83.6239 176.42C82.7116 175.774 82.324 174.604 82.6631 173.53C83.0022 172.456 84.0034 171.737 85.1257 171.737H91.5849C94.2331 171.737 96.51 170.147 97.5031 167.862H85.1257C83.6966 167.862 82.542 166.707 82.542 165.278C82.542 163.849 83.6966 162.694 85.1257 162.694H97.5031C96.51 160.41 94.2331 158.819 91.5849 158.819H85.1257C83.6966 158.819 82.542 157.664 82.542 156.235Z"/>
+          <path fill="#fff"
+            d="M110.463 189.781V184.44H118.268V160.694H111.837V156.604C113.559 156.263 115.062 155.865 116.344 155.411C117.627 154.918 118.817 154.331 119.917 153.649H124.644V184.44H131.514V189.781H110.463Z"/>
+          <path fill="#fff"
+            d="M146.247 190.462C143.425 190.462 141.043 189.97 139.101 188.985C137.196 187.963 135.602 186.789 134.32 185.463L137.233 181.259C138.295 182.282 139.486 183.191 140.805 183.986C142.124 184.743 143.663 185.122 145.422 185.122C147.364 185.122 148.977 184.516 150.259 183.304C151.542 182.092 152.183 180.388 152.183 178.191C152.183 176.033 151.597 174.366 150.424 173.192C149.251 172.018 147.694 171.431 145.752 171.431C144.616 171.431 143.663 171.601 142.894 171.942C142.124 172.245 141.208 172.756 140.146 173.476L137.123 171.488L138.167 153.649H156.855V159.16H143.663L142.949 167.909C143.682 167.53 144.396 167.246 145.092 167.057C145.825 166.829 146.65 166.716 147.566 166.716C149.581 166.716 151.413 167.113 153.062 167.909C154.711 168.704 156.03 169.935 157.02 171.601C158.046 173.268 158.559 175.408 158.559 178.021C158.559 180.634 157.972 182.869 156.8 184.724C155.664 186.58 154.162 188 152.293 188.985C150.424 189.97 148.409 190.462 146.247 190.462Z"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+</body>
+</html>

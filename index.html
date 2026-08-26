@@ -270,9 +270,30 @@
     .mobile-input-focused #screen-mobile .legal-text{display:none !important;}
   }
 
-  /* ---------- splash ---------- */
-  #screen-splash{align-items:center; justify-content:center;}
-  #screen-splash svg{width:136px;}
+  /* ---------- splash + onboarding ---------- */
+  #screen-splash{padding:0; align-items:stretch; justify-content:stretch;}
+  .splash-frame{width:100%; height:100%; border:0; background:#fff;}
+  #screen-intro{padding:0; overflow:hidden; background:#fff;}
+  .intro-logo{height:126px; flex:none; display:flex; align-items:center; justify-content:center; border-bottom:1px solid rgba(128,128,128,.12);}
+  .intro-logo svg{width:104px; height:auto;}
+  .intro-panel{min-height:0; flex:1; display:flex; flex-direction:column; padding:12px 24px 18px; border-radius:22px 22px 0 0; background:#fff; box-shadow:0 -4px 14px rgba(21,30,52,.08);}
+  .intro-art{height:330px; flex:none; overflow:hidden; touch-action:pan-y;}
+  .intro-art iframe{width:100%; height:100%; border:0; display:block; background:transparent; pointer-events:none;}
+  .intro-copy{text-align:center; min-height:82px; display:flex; flex-direction:column; justify-content:flex-start;}
+  .intro-copy h2{margin:0; color:#111; font-size:20px; line-height:26px; font-weight:600;}
+  .intro-copy p{margin:4px auto 0; max-width:330px; color:var(--grey-555); font-size:14px; line-height:19px;}
+  .intro-dots{height:30px; display:flex; align-items:center; justify-content:center; gap:5px;}
+  .intro-dot{width:6px; height:6px; padding:0; border:0; border-radius:50%; background:#A8A8A8; cursor:pointer; transition:width .2s,background .2s;}
+  .intro-dot.active{width:14px; border-radius:6px; background:#777;}
+  .intro-actions{margin-top:auto; display:flex; flex-direction:column; gap:8px;}
+  .intro-actions .btn{height:50px;}
+  .intro-login{background:#fff; color:var(--blue); border:1px solid var(--blue);}
+  @media(max-height:760px){
+    .intro-logo{height:96px;}
+    .intro-panel{padding-top:8px;}
+    .intro-art{height:270px;}
+    .intro-copy{min-height:72px;}
+  }
 
   /* ---------- OTP ---------- */
   .otp-row{display:flex; gap:14px; justify-content:center; margin-top:24px;}
@@ -387,7 +408,7 @@
 <body>
 
 <div class="device">
-  <button class="restart-btn" onclick="restartFlow()" title="Restart prototype">
+  <button class="restart-btn" onclick="restartFlow()" title="Restart prototype" style="display:none;">
     <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
   </button>
 
@@ -395,26 +416,26 @@
 
     <!-- SPLASH -->
     <section class="screen active" id="screen-splash">
-      <div class="spacer"></div>
-      <div style="align-self:center;">
-        <svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M36.7424 48.8929C35.9506 48.8929 35.1589 48.6744 34.4492 48.2107C32.5108 46.9557 31.9375 44.3363 33.2207 42.3718L47.6075 20.2718C48.8632 18.3346 51.4839 17.7616 53.4496 19.044C55.3877 20.299 55.961 22.9183 54.678 24.8828L40.2912 46.9829C39.4723 48.2107 38.1346 48.8929 36.7424 48.8929Z" fill="#3F71EB"/>
-          <path d="M12.6643 32.3314C11.818 32.3314 10.9717 32.0859 10.2346 31.5675C8.32369 30.2307 7.88688 27.5841 9.22456 25.7014L21.7276 7.50299C23.0653 5.59309 25.7134 5.15655 27.597 6.49347C29.5079 7.8304 29.9448 10.477 28.6071 12.3596L16.104 30.558C15.285 31.704 14.0019 32.3314 12.6643 32.3314Z" fill="#E02B59"/>
-          <path d="M7.20445 15.5253C6.38548 15.5253 5.56651 15.2797 4.82942 14.7886C2.91847 13.479 2.42708 10.8597 3.73745 8.92251L8.43294 1.82865C9.7433 -0.0812379 12.364 -0.572352 14.3023 0.737286C16.2133 2.04692 16.7046 4.66621 15.3943 6.60338L10.6988 13.6972C9.87979 14.8977 8.54214 15.5253 7.20445 15.5253Z" fill="#EEB268"/>
-          <path d="M29.4804 33.8053C28.6886 33.8053 27.8972 33.587 27.1873 33.123C25.249 31.8408 24.6757 29.2489 25.9588 27.2844L42.0107 1.99197C43.2939 0.0548024 45.8873 -0.518163 47.8527 0.764189C49.7912 2.04654 50.3644 4.63854 49.0812 6.60299L33.0292 31.8953C32.2103 33.1505 30.8453 33.8053 29.4804 33.8053Z" fill="#00B48E"/>
-          <path d="M70.1018 9.0305V20.8991H66.4436V9.0305H61.748V5.78369H74.7971V9.0305H70.1018Z" fill="#151E34"/>
-          <path d="M85.7985 20.8991L83.0961 15.6605H80.2842V20.8991H76.626V5.78369H83.7238C87.4639 5.78369 89.4021 7.80271 89.4021 10.613C89.4021 12.8503 88.0099 14.3236 86.5902 14.9511L89.8388 20.8991H85.7985ZM83.6421 9.0305H80.2294V12.7684H83.6421C84.8158 12.7684 85.7167 12.059 85.7167 10.8858C85.744 9.65803 84.8158 9.0305 83.6421 9.0305Z" fill="#151E34"/>
-          <path d="M107.829 20.8991V5.78369H114.081C119.131 5.78369 121.834 9.05777 121.834 13.3414C121.834 17.625 119.131 20.8991 114.081 20.8991H107.829ZM114.108 17.6523C116.756 17.6523 118.121 15.9879 118.121 13.3141C118.121 10.6675 116.756 9.0032 114.108 9.0032H111.46V17.6796H114.108V17.6523Z" fill="#151E34"/>
-          <path d="M123.445 20.8991V5.78369H134.992V9.0305H127.048V11.5952H133.955V14.46H127.048V17.6796H135.211V20.8991H123.445Z" fill="#151E34"/>
-          <path d="M102.233 20.8991H106.274L100.704 5.78369H96.3366L90.7128 20.8991H94.6712L98.4386 8.78493L101.36 18.2252L102.233 20.8991Z" fill="#151E34"/>
-          <path d="M74.6061 30.5033L71.9035 32.1678C71.0025 30.8853 69.5556 30.3668 68.1088 30.3668C66.8256 30.3668 65.9249 30.8308 65.9249 31.813C65.9249 32.9043 67.3716 33.15 69.0096 33.45C72.1765 34.023 74.8791 34.9779 74.8791 38.0884C74.8791 40.9533 72.5587 43.1087 68.5183 43.1087C65.2424 43.1087 62.7035 41.717 61.5023 39.3161L64.3415 37.8154C65.3514 39.5343 66.9896 40.1618 68.6821 40.1618C70.2655 40.1618 71.3302 39.5616 71.3302 38.5793C71.3302 37.2971 69.856 37.0789 68.0541 36.7786C64.9695 36.2329 62.376 35.2507 62.376 32.0585C62.376 29.1936 64.751 27.4474 68.2453 27.4474C70.593 27.4202 73.0772 28.2661 74.6061 30.5033Z" fill="#151E34"/>
-          <path d="M90.5486 42.8082V31.5128L86.8632 42.8082H83.9423L80.2841 31.5945V42.8082H76.7625V27.6929H81.9766L85.4162 38.3063L88.8561 27.6929H94.0429V42.8082C94.0974 42.8082 90.5486 42.8082 90.5486 42.8082Z" fill="#151E34"/>
-          <path d="M121.233 42.8082L118.531 37.5698H115.719V42.8082H112.061V27.6929H119.186C122.926 27.6929 124.864 29.7118 124.864 32.5222C124.864 34.7594 123.472 36.2329 122.052 36.8604L125.301 42.8082C125.328 42.8082 121.233 42.8082 121.233 42.8082ZM119.104 30.9398H115.691V34.6777H119.104C120.278 34.6777 121.179 33.9682 121.179 32.795C121.179 31.5945 120.278 30.9398 119.104 30.9398Z" fill="#151E34"/>
-          <path d="M134.119 30.9398V42.8082H130.488V30.9398H125.792V27.6929H138.814V30.9398H134.119Z" fill="#151E34"/>
-          <path d="M106.792 42.8082H110.832L105.236 27.6929H100.923L95.2991 42.8082H99.2575L103.025 30.7215L105.946 40.1618L106.792 42.8082Z" fill="#151E34"/>
-        </svg>
+      <iframe class="splash-frame" src="./onboarding-assets/splash.html" title="TradeSmart animated splash"></iframe>
+    </section>
+
+    <!-- INTRO SLIDES -->
+    <section class="screen" id="screen-intro">
+      <div class="intro-logo"><svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg></div>
+      <div class="intro-panel" id="introPanel">
+        <div class="intro-art" id="introArt">
+          <iframe id="introFrame" title="TradeSmart onboarding illustration" onload="prepareIntroFrame(this)"></iframe>
+        </div>
+        <div class="intro-copy">
+          <h2 id="introTitle"></h2>
+          <p id="introDescription"></p>
+        </div>
+        <div class="intro-dots" id="introDots" aria-label="Onboarding slides"></div>
+        <div class="intro-actions">
+          <button class="btn enabled" onclick="startOpenAccountFlow()">Open Demat A/C</button>
+          <button class="btn intro-login" onclick="enterLoginFlow()">Login</button>
+        </div>
       </div>
-      <div class="spacer"></div>
     </section>
 
     <!-- MOBILE NUMBER / VERIFY / RESULT (single morphing screen, no page transitions) -->
@@ -738,20 +759,21 @@
 
 <script>
 /* ---------------- state ---------------- */
-const state = { mobile:'', isNewUser:false, userId:'', pan:'', otpFlow:'' };
+const state = { mobile:'', isNewUser:false, userId:'', pan:'', otpFlow:'', entryIntent:'login' };
 let history = ['screen-splash'];
 
 function goTo(id, replace){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  document.querySelector('.restart-btn').style.display = id === 'screen-ekyc' ? 'none' : 'flex';
+  const hideRestart = ['screen-splash','screen-intro','screen-ekyc'].includes(id);
+  document.querySelector('.restart-btn').style.display = hideRestart ? 'none' : 'flex';
   if(replace){ history[history.length-1] = id; } else { history.push(id); }
   window.scrollTo(0,0);
   if(id === 'screen-otp') startOtpCountdown();
 }
 
 function restartFlow(){
-  state.mobile=''; state.isNewUser=false; state.userId=''; state.pan=''; state.otpFlow='';
+  state.mobile=''; state.isNewUser=false; state.userId=''; state.pan=''; state.otpFlow=''; state.entryIntent='login';
   resetToMobileEntry();
   document.querySelectorAll('.otp-box').forEach(b=>{b.value='';b.classList.remove('filled');});
   document.getElementById('otpContinue').disabled = true;
@@ -766,7 +788,7 @@ function restartFlow(){
   validateNewPassword();
   history = ['screen-splash'];
   goTo('screen-splash', true);
-  setTimeout(()=>{ if(document.getElementById('screen-splash').classList.contains('active')) goTo('screen-mobile'); }, 1400);
+  setTimeout(()=>{ if(document.getElementById('screen-splash').classList.contains('active')) openIntroSlides(); }, 2200);
 }
 
 function showToast(msg){
@@ -793,8 +815,110 @@ function keepFocusedControlVisible(el){
   setTimeout(()=>el.scrollIntoView({block:'nearest', inline:'nearest'}), 80);
 }
 
-/* ---------------- splash auto-advance ---------------- */
-setTimeout(()=>{ goTo('screen-mobile'); }, 1400);
+/* ---------------- splash + onboarding slides ---------------- */
+const introSlides = [
+  {
+    asset:'./onboarding-assets/slide-1.html',
+    title:'Lowest Brokerage/Order',
+    description:'Enjoy cost-effective trading with no hidden charges.'
+  },
+  {
+    asset:'./onboarding-assets/slide-2.html',
+    title:'30 years of expertise',
+    description:'Trusted by 200000+ traders across India.'
+  },
+  {
+    asset:'./onboarding-assets/slide-3.html',
+    title:'Live Support',
+    description:'Instant support through WhatsApp, live chat, phone, or email.'
+  },
+  {
+    asset:'./onboarding-assets/slide-4.html',
+    title:'Advanced Order Types',
+    description:'Access Cash, F&O, Cover Order, Bracket Order, GTT, Iceberg & more'
+  },
+  {
+    asset:'./onboarding-assets/slide-5.html',
+    title:'Seamless Trading',
+    description:'User-friendly design, fast. Trade in a few taps'
+  }
+];
+let introIndex = 0;
+let introPointerStartX = 0;
+
+function openIntroSlides(){
+  goTo('screen-intro');
+  showIntroSlide(0);
+}
+
+function showIntroSlide(index){
+  introIndex = Math.max(0, Math.min(introSlides.length - 1, index));
+  const slide = introSlides[introIndex];
+  document.getElementById('introTitle').textContent = slide.title;
+  document.getElementById('introDescription').textContent = slide.description;
+  document.querySelectorAll('.intro-dot').forEach((dot, dotIndex)=>{
+    dot.classList.toggle('active', dotIndex === introIndex);
+    dot.setAttribute('aria-current', dotIndex === introIndex ? 'true' : 'false');
+  });
+  const frame = document.getElementById('introFrame');
+  frame.title = slide.title;
+  frame.src = slide.asset;
+}
+
+function prepareIntroFrame(frame){
+  try{
+    const doc = frame.contentDocument;
+    if(!doc || !doc.body) return;
+    const style = doc.createElement('style');
+    style.textContent = `
+      html,body{height:100%!important;min-height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;background:transparent!important}
+      .replay,.controls,.hint{display:none!important}
+      .card,.scene{box-shadow:none!important;background:transparent!important}
+      .card{padding:0!important}
+    `;
+    doc.head.appendChild(style);
+    if(!frame.contentWindow.gsap){
+      const scene = doc.querySelector('.scene svg');
+      const art = doc.querySelector('#art svg');
+      if(scene) scene.style.visibility = 'visible';
+      if(art){ art.style.opacity = '1'; art.style.transform = 'none'; }
+    }
+  }catch(error){
+    // If iframe styling is unavailable, the supplied standalone slide still renders.
+  }
+}
+
+function enterLoginFlow(){
+  state.entryIntent = 'login';
+  resetToMobileEntry();
+  goTo('screen-mobile');
+}
+
+function startOpenAccountFlow(){
+  state.entryIntent = 'open-account';
+  resetToMobileEntry();
+  goTo('screen-mobile');
+}
+
+const introDots = document.getElementById('introDots');
+introSlides.forEach((slide, index)=>{
+  const dot = document.createElement('button');
+  dot.type = 'button';
+  dot.className = 'intro-dot';
+  dot.setAttribute('aria-label', `Show slide ${index + 1}: ${slide.title}`);
+  dot.addEventListener('click', ()=>showIntroSlide(index));
+  introDots.appendChild(dot);
+});
+const introArt = document.getElementById('introArt');
+introArt.addEventListener('pointerdown', event=>{ introPointerStartX = event.clientX; });
+introArt.addEventListener('pointerup', event=>{
+  const distance = event.clientX - introPointerStartX;
+  if(Math.abs(distance) < 40) return;
+  if(distance < 0 && introIndex < introSlides.length - 1) showIntroSlide(introIndex + 1);
+  if(distance > 0 && introIndex > 0) showIntroSlide(introIndex - 1);
+});
+
+setTimeout(()=>{ if(document.getElementById('screen-splash').classList.contains('active')) openIntroSlides(); }, 2200);
 
 /* ---------------- mobile number / verify / result (single morphing screen) ---------------- */
 const mobileInput = document.getElementById('mobileInput');
@@ -931,7 +1055,7 @@ function showVerifyResult(){
   mobileVerifiedIcon.style.display = 'flex';
   mobileBox.classList.add('verified');
   mobileHelper.style.display = 'none';
-  state.isNewUser = (state.mobile === '9999999999');
+  state.isNewUser = state.entryIntent === 'open-account' || state.mobile === '9999999999';
   if(state.isNewUser){
     mobileStep = 'no-account';
     updateMobileHeaderMode();

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TradeSmart — Splash</title>
+<style>
+  /* =========================================================
+     TradeSmart Splash Screen — 2s intro + idle loop
+     Stack-safe: plain CSS keyframes, no JS required for motion.
+     (The small JS block at the bottom is only the preview
+      replay button — remove for production.)
+     ========================================================= */
+
+  :root{
+    --ts-navy:  #151E34;
+    --ts-blue:  #3F71EB;
+    --ts-red:   #E02B59;
+    --ts-gold:  #EEB268;
+    --ts-green: #00B48E;
+    --splash-bg: #FFFFFF;
+
+    /* master timing — tweak here */
+    --t-bars:     0.50s;  /* each bar's grow duration            */
+    --t-letters:  0.40s;  /* each letter's reveal duration       */
+    --d-slide:    0.60s;  /* mark starts sliding left            */
+    --t-slide:    0.50s;  /* slide duration                      */
+    --d-words:    0.82s;  /* TRADE + SMART reveal together       */
+    --d-sheen:    1.20s;  /* light sweep across the mark         */
+    --d-idle:     1.85s;  /* breathing loop begins               */
+  }
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  html,body{ height:100%; }
+
+  body{
+    background: var(--splash-bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  .splash{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  .splash svg{
+    width: min(58vw, 300px);
+    height: auto;
+    overflow: visible;
+  }
+
+  /* ---------- 1. Mark: four strokes grow upward ---------- */
+
+  .bar{
+    transform-box: fill-box;
+    transform-origin: 50% 100%;           /* grow from the base */
+    transform: scale(0.001);
+    opacity: 0;
+    animation: barGrow var(--t-bars) cubic-bezier(0.34, 1.45, 0.45, 1) forwards;
+  }
+
+  .bar-gold  { animation-delay: 0.00s; }
+  .bar-red   { animation-delay: 0.09s; }
+  .bar-green { animation-delay: 0.18s; }
+  .bar-blue  { animation-delay: 0.27s; }
+
+  @keyframes barGrow{
+    0%   { transform: scale(0.001); opacity: 0; }
+    30%  { opacity: 1; }
+    100% { transform: scale(1);     opacity: 1; }
+  }
+
+  /* ---------- 1b. Mark position: born centered, slides left ----------
+     The mark is ~35 units wide inside a 91.59-unit lockup, so
+     (91.59 − 35) / 2 ≈ 28.3 units of offset centers it.        */
+
+  .mark-pos{
+    transform: translateX(28.3px);
+    animation: slideLeft var(--t-slide) cubic-bezier(0.65, 0, 0.25, 1) var(--d-slide) forwards;
+  }
+
+  @keyframes slideLeft{
+    to{ transform: translateX(0); }
+  }
+
+  /* ---------- 2. Wordmark: letters rise from baseline ---------- */
+
+  .ltr{
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    transform: translateX(-9px);
+    opacity: 0;
+    filter: blur(3px);
+    animation: letterReveal var(--t-letters) cubic-bezier(0.22, 0.9, 0.3, 1) forwards;
+  }
+
+  @keyframes letterReveal{
+    to{ transform: translateX(0); opacity: 1; filter: blur(0); }
+  }
+
+  /* per-letter stagger, left → right (SVG path order ≠ visual order,
+     so delays are assigned explicitly per letter) */
+  /* both rows share --d-words; the stagger runs per COLUMN, so the
+     rows reveal in lockstep, sweeping left → right together */
+  .t1{ animation-delay: calc(var(--d-words) + 0.00s); }  /* T */
+  .t2{ animation-delay: calc(var(--d-words) + 0.04s); }  /* R */
+  .t3{ animation-delay: calc(var(--d-words) + 0.08s); }  /* A */
+  .t4{ animation-delay: calc(var(--d-words) + 0.12s); }  /* D */
+  .t5{ animation-delay: calc(var(--d-words) + 0.16s); }  /* E */
+
+  .s1{ animation-delay: calc(var(--d-words) + 0.00s); }  /* S */
+  .s2{ animation-delay: calc(var(--d-words) + 0.04s); }  /* M */
+  .s3{ animation-delay: calc(var(--d-words) + 0.08s); }  /* A */
+  .s4{ animation-delay: calc(var(--d-words) + 0.12s); }  /* R */
+  .s5{ animation-delay: calc(var(--d-words) + 0.16s); }  /* T */
+
+  /* ---------- 3. Light sweep across the mark ---------- */
+
+  .sheen{
+    opacity: 0;
+    animation: sheenSweep 0.6s ease-in-out var(--d-sheen) 1 forwards;
+  }
+
+  @keyframes sheenSweep{
+    0%   { transform: translateX(-40px); opacity: 0;   }
+    25%  { opacity: 0.85; }
+    100% { transform: translateX(50px);  opacity: 0;   }
+  }
+
+  /* ---------- 4. Idle: gentle breathing on the mark ---------- */
+
+  .mark{
+    transform-box: fill-box;
+    transform-origin: 50% 60%;
+    animation: breathe 3.2s ease-in-out var(--d-idle) infinite;
+  }
+
+  @keyframes breathe{
+    0%, 100% { transform: scale(1);     }
+    50%      { transform: scale(1.02);  }
+  }
+
+  /* ---------- Accessibility ---------- */
+
+  @media (prefers-reduced-motion: reduce){
+    .bar, .ltr, .mark, .mark-pos{ animation: none; transform:none; opacity:1; filter:none; }
+    .sheen{ display:none; }
+  }
+
+  /* ---------- Preview-only replay button (remove in prod) ---------- */
+  .replay{
+    display:none;
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    border: 1px solid #E3E7EF; background:#fff; color:#8A93A6;
+    font-size: 12px; letter-spacing:.04em; padding: 8px 18px;
+    border-radius: 999px; cursor: pointer; transition: color .2s, border-color .2s;
+  }
+  .replay:hover{ color: var(--ts-navy); border-color:#C7CEDB; }
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <svg viewBox="0 0 92 33" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="TradeSmart">
+    <defs>
+      <!-- clip the sheen to the four strokes only -->
+      <clipPath id="markClip">
+        <path d="M22.7542 33.0088C22.2203 33.0088 21.6864 32.8614 21.2077 32.5483C19.9006 31.701 19.514 29.9326 20.3793 28.6064L30.0814 13.6862C30.9282 12.3784 32.6956 11.9916 34.0211 12.8573C35.3282 13.7046 35.7148 15.4729 34.8496 16.7992L25.1475 31.7194C24.5952 32.5483 23.6931 33.0088 22.7542 33.0088Z"/>
+        <path d="M6.51688 21.8273C5.94616 21.8273 5.37545 21.6615 4.87838 21.3116C3.58968 20.409 3.29512 18.6222 4.19721 17.3513L12.629 5.06513C13.5311 3.77573 15.3169 3.48101 16.5872 4.38359C17.8759 5.28617 18.1704 7.07291 17.2683 8.34389L8.83654 20.63C8.28424 21.4037 7.41897 21.8273 6.51688 21.8273Z"/>
+        <path d="M2.83521 10.4809C2.28291 10.4809 1.73061 10.3151 1.23353 9.98357C-0.0551687 9.09941 -0.38655 7.33109 0.497133 6.02327L3.66366 1.23408C4.54734 -0.0553217 6.31471 -0.386881 7.62182 0.497278C8.91053 1.38144 9.24191 3.14976 8.35822 4.45758L5.1917 9.24677C4.63939 10.0573 3.7373 10.4809 2.83521 10.4809Z"/>
+        <path d="M17.8577 22.8219C17.3238 22.8219 16.7899 22.6746 16.3112 22.3614C15.0041 21.4957 14.6175 19.7458 15.4828 18.4196L26.3079 1.34422C27.1732 0.0364032 28.9221 -0.350417 30.2476 0.515323C31.5548 1.38106 31.9414 3.13096 31.0761 4.4572L20.251 21.5325C19.6987 22.3799 18.7782 22.8219 17.8577 22.8219Z"/>
+      </clipPath>
+      <linearGradient id="sheenGrad" x1="0" y1="0" x2="1" y2="0.4">
+        <stop offset="0"   stop-color="#fff" stop-opacity="0"/>
+        <stop offset="0.5" stop-color="#fff" stop-opacity="0.75"/>
+        <stop offset="1"   stop-color="#fff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    <!-- ===== Logo mark: born centered, slides left, then breathes ===== -->
+    <g class="mark-pos">
+    <g class="mark">
+      <path class="bar bar-blue"  d="M22.7542 33.0088C22.2203 33.0088 21.6864 32.8614 21.2077 32.5483C19.9006 31.701 19.514 29.9326 20.3793 28.6064L30.0814 13.6862C30.9282 12.3784 32.6956 11.9916 34.0211 12.8573C35.3282 13.7046 35.7148 15.4729 34.8496 16.7992L25.1475 31.7194C24.5952 32.5483 23.6931 33.0088 22.7542 33.0088Z" fill="#3F71EB"/>
+      <path class="bar bar-red"   d="M6.51688 21.8273C5.94616 21.8273 5.37545 21.6615 4.87838 21.3116C3.58968 20.409 3.29512 18.6222 4.19721 17.3513L12.629 5.06513C13.5311 3.77573 15.3169 3.48101 16.5872 4.38359C17.8759 5.28617 18.1704 7.07291 17.2683 8.34389L8.83654 20.63C8.28424 21.4037 7.41897 21.8273 6.51688 21.8273Z" fill="#E02B59"/>
+      <path class="bar bar-gold"  d="M2.83521 10.4809C2.28291 10.4809 1.73061 10.3151 1.23353 9.98357C-0.0551687 9.09941 -0.38655 7.33109 0.497133 6.02327L3.66366 1.23408C4.54734 -0.0553217 6.31471 -0.386881 7.62182 0.497278C8.91053 1.38144 9.24191 3.14976 8.35822 4.45758L5.1917 9.24677C4.63939 10.0573 3.7373 10.4809 2.83521 10.4809Z" fill="#EEB268"/>
+      <path class="bar bar-green" d="M17.8577 22.8219C17.3238 22.8219 16.7899 22.6746 16.3112 22.3614C15.0041 21.4957 14.6175 19.7458 15.4828 18.4196L26.3079 1.34422C27.1732 0.0364032 28.9221 -0.350417 30.2476 0.515323C31.5548 1.38106 31.9414 3.13096 31.0761 4.4572L20.251 21.5325C19.6987 22.3799 18.7782 22.8219 17.8577 22.8219Z" fill="#00B48E"/>
+
+      <!-- light sweep, clipped to the strokes -->
+      <g clip-path="url(#markClip)">
+        <rect class="sheen" x="-14" y="-4" width="26" height="42" fill="url(#sheenGrad)" transform="skewX(-12)"/>
+      </g>
+    </g>
+    </g>
+
+    <!-- ===== TRADE ===== -->
+    <path class="ltr t1" d="M45.2526 6.09646V14.1092H42.7857V6.09646H39.6191V3.90448H48.4191V6.09646H45.2526Z" fill="#151E34"/>
+    <path class="ltr t2" d="M55.8381 14.1093L54.0155 10.5727H52.1193V14.1093H49.6523V3.90466H54.439C56.9611 3.90466 58.2682 5.26774 58.2682 7.165C58.2682 8.67544 57.3293 9.67012 56.372 10.0938L58.5628 14.1093H55.8381ZM54.3837 6.09664H52.0825V8.62018H54.3837C55.1754 8.62018 55.7829 8.14126 55.7829 7.3492C55.8013 6.5203 55.1754 6.09664 54.3837 6.09664Z" fill="#151E34"/>
+    <path class="ltr t3" d="M66.9214 14.1093H69.6461L65.8904 3.90466H62.9448L59.1523 14.1093H61.8218L64.3624 5.93086L66.3323 12.3042L66.9214 14.1093Z" fill="#151E34"/>
+    <path class="ltr t4" d="M70.6953 14.1093V3.90466H74.9112C78.3171 3.90466 80.1397 6.11506 80.1397 9.007C80.1397 11.8989 78.3171 14.1093 74.9112 14.1093H70.6953ZM74.9296 11.9174C76.7154 11.9174 77.6359 10.7937 77.6359 8.98858C77.6359 7.20184 76.7154 6.07822 74.9296 6.07822H73.1438V11.9358H74.9296V11.9174Z" fill="#151E34"/>
+    <path class="ltr t5" d="M81.2246 14.1093V3.90466H89.0121V6.09664H83.6547V7.82812H88.3125V9.76222H83.6547V11.9358H89.1593V14.1093H81.2246Z" fill="#151E34"/>
+
+    <!-- ===== SMART ===== -->
+    <path class="ltr s1" d="M48.2899 20.5934L46.4674 21.717C45.8598 20.8513 44.8841 20.5013 43.9084 20.5013C43.0431 20.5013 42.4356 20.8144 42.4356 21.4775C42.4356 22.2143 43.4113 22.3801 44.5159 22.5827C46.6515 22.9696 48.474 23.6143 48.474 25.7141C48.474 27.6482 46.9092 29.1034 44.1845 29.1034C41.9753 29.1034 40.2632 28.164 39.4531 26.543L41.3678 25.5299C42.0489 26.6904 43.1535 27.1141 44.295 27.1141C45.3628 27.1141 46.0807 26.7088 46.0807 26.0457C46.0807 25.18 45.0866 25.0326 43.8715 24.83C41.7912 24.4616 40.0422 23.7985 40.0422 21.6433C40.0422 19.7092 41.6439 18.5303 44.0004 18.5303C45.5837 18.5119 47.259 19.0829 48.2899 20.5934Z" fill="#151E34"/>
+    <path class="ltr s2" d="M59.0412 28.901V21.2751L56.5559 28.901H54.586L52.119 21.3303V28.901H49.7441V18.6963H53.2605L55.5801 25.8617L57.8998 18.6963H61.3977V28.901C61.4345 28.901 59.0412 28.901 59.0412 28.901Z" fill="#151E34"/>
+    <path class="ltr s3" d="M69.9967 28.901H72.7214L68.9474 18.6963H66.0386L62.2461 28.901H64.9156L67.4561 20.7409L69.426 27.1142L69.9967 28.901Z" fill="#151E34"/>
+    <path class="ltr s4" d="M79.7346 28.901L77.912 25.3643H76.0158V28.901H73.5488V18.6963H78.3539C80.876 18.6963 82.1831 20.0594 82.1831 21.9566C82.1831 23.4671 81.2442 24.4617 80.2869 24.8854L82.4777 28.901C82.4961 28.901 79.7346 28.901 79.7346 28.901ZM78.2986 20.8883H75.9974V23.4118H78.2986C79.0903 23.4118 79.6978 22.9329 79.6978 22.1408C79.6978 21.3303 79.0903 20.8883 78.2986 20.8883Z" fill="#151E34"/>
+    <path class="ltr s5" d="M88.4237 20.8883V28.901H85.9751V20.8883H82.8086V18.6963H91.5902V20.8883H88.4237Z" fill="#151E34"/>
+  </svg>
+</div>
+
+<!-- Preview-only replay control — remove this block for production -->
+<button class="replay" onclick="replay()">Replay</button>
+<script>
+  function replay(){
+    const el = document.getElementById('splash');
+    const clone = el.cloneNode(true);
+    el.parentNode.replaceChild(clone, el);
+  }
+</script>
+
+</body>
+</html>

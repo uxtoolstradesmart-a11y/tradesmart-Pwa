@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trade in a few taps — animated</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:transparent;
+    min-height:100%;
+    display:flex;align-items:center;justify-content:center;
+    padding:0;
+  }
+  .art-wrap{
+    width:min(460px,84vw);
+    perspective:1100px;
+  }
+  .art-wrap svg{width:100%;height:auto;display:block;overflow:visible;will-change:transform;opacity:1}
+
+  .replay{
+    display:none!important;
+    position:fixed;right:18px;bottom:16px;
+    width:40px;height:40px;border-radius:50%;
+    background:#fff;border:1px solid #E7EBF3;cursor:pointer;
+    display:grid;place-items:center;color:#5B6576;
+    box-shadow:0 8px 18px -12px rgba(21,30,52,.4);
+    transition:transform .25s ease,color .2s ease;opacity:.85;
+  }
+  .replay:hover{transform:rotate(-40deg);color:#151E34}
+  .replay svg{width:18px;height:18px}
+</style>
+</head>
+<body>
+  <div class="art-wrap" id="art">
+    <!-- ====== the illustration you shared (animated) ====== -->
+    <svg viewBox="0 0 378 407" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <g clip-path="url(#clip0)">
+        <g id="phoneInner" clip-path="url(#clip1)">
+          <g filter="url(#fl0)">
+            <path id="phoneBody" d="M193.635 74.9133L192.293 75.4273L178.231 38.7114C176.072 33.0755 171.76 28.5291 166.244 26.0721C160.727 23.6152 154.458 23.4492 148.814 25.6105L70.9261 55.4411C65.2829 57.6024 60.7284 61.914 58.2643 67.4275C55.8003 72.9409 55.6286 79.2045 57.7871 84.8404L134.932 286.267C137.09 291.902 141.402 296.449 146.919 298.906C152.436 301.363 158.705 301.529 164.348 299.368L242.236 269.537C247.88 267.376 252.434 263.064 254.898 257.551C257.362 252.037 257.534 245.774 255.375 240.138L202.302 101.562L203.644 101.048L193.635 74.9133Z" fill="#151E34"/>
+          </g>
+          <path id="screen" d="M173.759 40.5937L250.79 241.723C252.402 245.932 252.274 250.61 250.434 254.728C248.594 258.845 245.192 262.065 240.978 263.68L162.716 293.653C158.501 295.267 153.819 295.143 149.699 293.308C145.579 291.474 142.359 288.078 140.747 283.869L63.7158 82.7395C62.1039 78.5305 62.2321 73.8527 64.0723 69.7351C65.9125 65.6176 69.3139 62.3976 73.5283 60.7834L83.0225 57.1472C82.9944 58.4708 83.2924 59.7807 83.8901 60.9617C84.4879 62.1427 85.3671 63.1586 86.4505 63.9201C87.5338 64.6815 88.7881 65.1652 90.103 65.3285C91.4179 65.4918 92.753 65.3298 93.9911 64.8567L138.612 47.767C139.85 47.2921 140.952 46.5207 141.821 45.5208C142.69 44.521 143.301 43.3232 143.598 42.0329C143.896 40.7426 143.871 39.3993 143.527 38.1211C143.183 36.8429 142.53 35.6691 141.625 34.7029L151.79 30.8096C156.005 29.1956 160.687 29.3197 164.807 31.1545C168.927 32.9894 172.147 36.3848 173.759 40.5937Z" fill="white"/>
+
+          <!-- chart bars (rotation on group, scale on rect) -->
+          <g transform="rotate(-20.88 106.332 157.773)"><rect class="bar" id="bar1" x="106.332" y="157.773" width="26.643" height="45.8852" rx="5.92067" fill="#ECF1FD"/></g>
+          <g transform="rotate(-20.88 132.864 131.81)"><rect class="bar" id="bar2" x="132.864" y="131.81" width="26.643" height="60.6869" rx="5.92067" fill="#ECF1FD"/></g>
+          <g transform="rotate(-20.88 158.342 103.081)"><rect class="bar" id="bar3" x="158.342" y="103.081" width="26.643" height="78.4489" rx="5.92067" fill="#ECF1FD"/></g>
+
+          <!-- the green uptrend arrow (reveals on its own) -->
+          <path id="arrowFill" opacity="0.6" d="M122.196 133.475C121.711 133.7 121.171 133.775 120.644 133.693C120.116 133.611 119.625 133.374 119.232 133.012C118.839 132.651 118.561 132.181 118.435 131.662C118.309 131.143 118.339 130.599 118.522 130.097L125.192 111.834C125.295 111.548 125.454 111.287 125.659 111.063C125.865 110.84 126.112 110.659 126.388 110.533L126.389 110.532C126.664 110.404 126.961 110.331 127.264 110.319C127.567 110.306 127.869 110.354 128.154 110.459L136.608 113.56C136.778 113.623 136.96 113.652 137.142 113.644C137.323 113.637 137.502 113.593 137.667 113.516C137.832 113.44 137.981 113.332 138.104 113.198C138.227 113.064 138.323 112.907 138.385 112.736L142.756 100.787C142.777 100.73 142.786 100.669 142.784 100.609C142.781 100.548 142.767 100.489 142.741 100.434C142.716 100.379 142.68 100.329 142.635 100.288C142.59 100.247 142.538 100.216 142.481 100.195L138.621 98.7828C138.364 98.6887 138.141 98.5204 137.979 98.2992C137.817 98.078 137.725 97.8139 137.714 97.5402C137.702 97.2665 137.772 96.9955 137.915 96.7616C138.058 96.5278 138.266 96.3415 138.515 96.2264L147.889 91.8836C148.222 91.7297 148.602 91.7142 148.947 91.8406C149.292 91.967 149.572 92.2249 149.727 92.5578L154.067 101.925C154.182 102.174 154.221 102.451 154.179 102.722C154.136 102.992 154.015 103.244 153.829 103.446C153.644 103.647 153.403 103.789 153.137 103.853C152.87 103.918 152.591 103.902 152.334 103.808L148.466 102.389C148.409 102.368 148.349 102.358 148.288 102.361C148.228 102.363 148.168 102.378 148.113 102.403C148.058 102.429 148.009 102.465 147.968 102.509C147.927 102.554 147.895 102.606 147.874 102.663L141.943 118.818C141.839 119.103 141.68 119.364 141.475 119.587C141.269 119.81 141.022 119.99 140.747 120.117C140.472 120.245 140.174 120.318 139.871 120.33C139.569 120.342 139.266 120.295 138.982 120.189L130.524 117.087C130.179 116.97 129.802 116.99 129.471 117.143C129.14 117.296 128.881 117.571 128.747 117.91L123.596 131.954C123.475 132.287 123.289 132.594 123.049 132.855C122.808 133.116 122.518 133.327 122.196 133.475Z" fill="#00B48E"/>
+
+          <!-- Buy / Sell -->
+          <g transform="rotate(-20.88 142.234 269.184)"><rect id="btnBuy" x="142.234" y="269.184" width="50.813" height="17.3611" rx="4.5651" fill="#3F71EB"/></g>
+          <g transform="rotate(-20.88 192.905 249.777)"><rect id="btnSell" x="192.905" y="249.777" width="50.813" height="17.3611" rx="4.5651" fill="#F03745"/></g>
+
+          <!-- placeholder rows -->
+          <rect class="row" x="134.67" y="232.41" width="96.5288" height="9.39133" rx="2.28255" transform="rotate(-20.88 134.67 232.41)" fill="#D9D9D9" fill-opacity="0.32"/>
+          <rect class="row" x="140.377" y="245.54" width="39.7942" height="9.39133" rx="2.28255" transform="rotate(-20.88 140.377 245.54)" fill="#D9D9D9" fill-opacity="0.32"/>
+          <rect class="row" x="180.321" y="229.884" width="52.6231" height="9.39133" rx="2.28255" transform="rotate(-20.88 180.321 229.884)" fill="#D9D9D9" fill-opacity="0.32"/>
+
+          <!-- glass glare sweep -->
+          <g clip-path="url(#screenClip)">
+            <rect id="glare" x="-60" y="-40" width="44" height="420" fill="url(#glareGrad)" transform="rotate(-21 150 165)"/>
+          </g>
+        </g>
+
+        <!-- hand -->
+        <g id="hand">
+          <rect x="345.867" y="353.969" width="123.954" height="74.9279" rx="2.68624" transform="rotate(-44.5066 345.867 353.969)" fill="#3F71EB"/>
+          <path d="M253.111 182.958C253.064 183.036 253.018 183.115 252.972 183.194M357.167 324.59L357.484 324.303" stroke="black" stroke-width="0.895414"/>
+          <path d="M253.367 182.985C253.284 182.976 253.198 182.966 253.111 182.958M357.485 324.303C357.511 324.329 357.537 324.355 357.564 324.381" stroke="black" stroke-width="0.895414"/>
+          <g filter="url(#fl1)">
+            <path d="M407.405 279.774L357.484 324.303C346.863 313.79 338.328 309.201 314.344 308.754C306.424 308.607 302.971 309.009 299.821 309.375C293.408 310.121 288.247 310.722 249.198 306.25C214.592 302.286 205.728 307.42 201.737 309.731C199.011 311.309 198.557 311.572 193.733 306.726C181.842 294.784 212.639 275.449 240.803 272.196C263.575 269.567 256.523 262.517 232.051 238.057L232.05 238.056C226.257 232.266 219.487 225.5 211.907 217.586C205.759 210.879 195.417 204.817 185.155 198.802L185.154 198.801C171.41 190.745 157.809 182.772 154.613 173.444C150.147 160.409 157.874 158.549 162.296 159.248C175.511 162.513 195.606 175.43 213.492 186.927C217.688 189.624 221.762 192.243 225.597 194.64C233.398 183.724 247.202 182.356 253.111 182.958C260.613 170.394 280.285 172.503 289.236 175.149C326.726 140.318 385.529 231.411 407.405 279.774Z" fill="#FFC9AD"/>
+            <path d="M407.405 279.774L357.484 324.303C346.863 313.79 338.328 309.201 314.344 308.754C306.424 308.607 302.971 309.009 299.821 309.375C293.408 310.121 288.247 310.722 249.198 306.25C214.592 302.286 205.728 307.42 201.737 309.731C199.011 311.309 198.557 311.572 193.733 306.726C181.842 294.784 212.639 275.449 240.803 272.196C263.575 269.567 256.523 262.517 232.051 238.057L232.05 238.056C226.257 232.266 219.487 225.5 211.907 217.586C205.759 210.879 195.417 204.817 185.155 198.802L185.154 198.801C171.41 190.745 157.809 182.772 154.613 173.444C150.147 160.409 157.874 158.549 162.296 159.248C175.511 162.513 195.606 175.43 213.492 186.927C217.688 189.624 221.762 192.243 225.597 194.64C233.398 183.724 247.202 182.356 253.111 182.958C260.613 170.394 280.285 172.503 289.236 175.149C326.726 140.318 385.529 231.411 407.405 279.774Z" stroke="url(#paint0)" stroke-width="0.447707"/>
+          </g>
+          <rect x="336.144" y="324.357" width="98.4956" height="27.6778" rx="2.68624" transform="rotate(-44.3871 336.144 324.357)" fill="#D9D9D9"/>
+          <path d="M288.477 174.672L303.017 182.619C305.63 183.576 309.946 184.569 306.308 180.877C303.179 177.702 295.63 174.332 290.796 173.31C290.01 173.144 289.088 174.774 288.477 174.672Z" fill="#FDB797"/>
+          <path d="M252.554 182.403L267.591 192.248C270.204 193.206 274.52 194.198 270.882 190.507C267.753 187.332 258.575 182.797 253.741 181.775C252.955 181.609 253.164 182.506 252.554 182.403Z" fill="#FDB797"/>
+          <path d="M225.63 193.744L240.17 201.691C242.783 202.649 247.099 203.641 243.461 199.95C240.332 196.775 232.63 193.114 227.795 192.092C227.01 191.926 226.241 193.847 225.63 193.744Z" fill="#FDB797"/>
+        </g>
+      </g>
+      <defs>
+        <filter id="fl0" x="36.6837" y="8.50156" width="239.795" height="315.975" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feFlood flood-opacity="0" result="bg"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="ha"/><feOffset dy="4"/><feGaussianBlur stdDeviation="9.8"/><feComposite in2="ha" operator="out"/><feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0"/><feBlend mode="normal" in2="bg" result="e1"/><feBlend mode="normal" in="SourceGraphic" in2="e1" result="shape"/>
+        </filter>
+        <filter id="fl1" x="139.35" y="149.768" width="282.022" height="193.103" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feFlood flood-opacity="0" result="bg"/><feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="ha"/><feOffset dy="4.5651"/><feGaussianBlur stdDeviation="6.84765"/><feComposite in2="ha" operator="out"/><feColorMatrix type="matrix" values="0 0 0 0 0.992157 0 0 0 0 0.717647 0 0 0 0 0.592157 0 0 0 0.1 0"/><feBlend mode="normal" in2="bg" result="e1"/><feBlend mode="normal" in="SourceGraphic" in2="e1" result="shape"/>
+        </filter>
+        <linearGradient id="paint0" x1="280.622" y1="79.4165" x2="219.184" y2="255.27" gradientUnits="userSpaceOnUse"><stop stop-color="#FDB797"/><stop offset="1" stop-color="#FED3BC"/></linearGradient>
+        <linearGradient id="glareGrad" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.5"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        <clipPath id="clip0"><rect width="380" height="407" fill="white"/></clipPath>
+        <clipPath id="clip1"><rect width="228.979" height="275.304" fill="white" transform="translate(0 81.8965) rotate(-20.9565)"/></clipPath>
+        <clipPath id="screenClip"><use href="#screen"/></clipPath>
+      </defs>
+    </svg>
+  </div>
+
+  <button class="replay" id="replay" aria-label="Replay animation" title="Replay">
+    <svg viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 2.3 5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M4 7v5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </button>
+
+<script>
+(function(){
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setStart(){
+    gsap.set('#art svg',{opacity:0, y:60, scale:.9, rotationX:14, transformOrigin:'50% 60%'});
+    gsap.set('.bar',{scaleY:0, transformOrigin:'50% 100%'});
+    gsap.set('.row',{opacity:0, y:6});
+    gsap.set('#arrowFill',{opacity:0, scale:.55, y:5, transformOrigin:'0% 100%'});
+    gsap.set('#btnBuy, #btnSell',{scale:0, transformOrigin:'50% 50%'});
+    gsap.set('#hand',{x:140, y:155, rotation:7, opacity:0, transformOrigin:'90% 90%'});
+    gsap.set('#glare',{x:-120});
+  }
+  function setEnd(){
+    gsap.set('#art svg',{opacity:1, y:0, scale:1, rotationX:0});
+    gsap.set('.bar',{scaleY:1});
+    gsap.set('.row',{opacity:1, y:0});
+    gsap.set('#arrowFill',{opacity:.6, scale:1, y:0});
+    gsap.set('#btnBuy, #btnSell',{scale:1});
+    gsap.set('#hand',{x:0, y:0, rotation:0, opacity:1});
+  }
+
+  let idles=[];
+  const killIdles=()=>{idles.forEach(t=>t.kill());idles=[];};
+  function startIdles(){
+    killIdles();
+    idles.push(gsap.to('#art svg',{y:'-=7', rotationX:-3, duration:3.4, ease:'sine.inOut', yoyo:true, repeat:-1}));
+    idles.push(gsap.to('#bar3',{opacity:.82, duration:1.2, ease:'sine.inOut', yoyo:true, repeat:-1}));
+    idles.push(gsap.fromTo('#glare',{x:-120},{x:240, duration:1.3, ease:'power2.inOut', repeat:-1, repeatDelay:5.5}));
+  }
+
+  function play(){
+    killIdles();
+    setStart();
+    const tl = gsap.timeline({defaults:{ease:'power3.out'}, onComplete:startIdles});
+
+    tl.to('#art svg',{opacity:1, y:0, scale:1, rotationX:0, duration:1.05, ease:'expo.out'}, .05);
+    tl.to('.row',{opacity:1, y:0, duration:.4, stagger:.07}, .55);
+    tl.to('.bar',{scaleY:1, duration:.8, ease:'back.out(1.9)', stagger:.13}, .6);
+
+    // arrow reveals on its own — pop up from its tail with a brief glow
+    tl.to('#arrowFill',{opacity:.6, scale:1, y:0, duration:.6, ease:'back.out(2)'}, 1.0);
+    tl.fromTo('#arrowFill',{filter:'drop-shadow(0 0 0 rgba(0,180,142,0))'},
+      {filter:'drop-shadow(0 0 7px rgba(0,180,142,.8))', duration:.28, yoyo:true, repeat:1, ease:'sine.inOut'}, 1.15);
+
+    tl.to('#btnBuy, #btnSell',{scale:1, duration:.55, ease:'back.out(2.4)', stagger:.1}, 1.5);
+    tl.fromTo('#glare',{x:-120},{x:240, duration:.95, ease:'power2.inOut'}, 1.6);
+
+    // hand glides in and taps (no ripple)
+    tl.to('#hand',{x:0, y:0, rotation:0, opacity:1, duration:.7, ease:'power3.out'}, 1.85);
+    tl.add('tap', 2.5);
+    tl.to('#hand',{y:'-=7', x:'-=4', duration:.14, ease:'power2.in'}, 'tap-=0.14');
+    tl.to('#hand',{y:'+=7', x:'+=4', duration:.4, ease:'elastic.out(1,.5)'}, 'tap');
+    // tapped bar gives a little confirm
+    tl.to('#bar2',{scaleY:1.06, duration:.16, ease:'power2.out', transformOrigin:'50% 100%'}, 'tap');
+    tl.to('#bar2',{scaleY:1, duration:.5, ease:'elastic.out(1,.45)'}, 'tap+=0.16');
+
+    return tl;
+  }
+
+  if(reduce){ setEnd(); } else { play(); }
+  document.getElementById('replay').addEventListener('click', play);
+})();
+</script>
+</body>
+</html>
