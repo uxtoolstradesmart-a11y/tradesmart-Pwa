@@ -521,7 +521,6 @@
       <div class="spacer"></div>
       <p class="legal-text" id="mobileLegal">
         <span>TradeSmart Fintech Securities Limited</span>
-        <span>(Formerly known as VNS Finance and Capital Services Limited)</span>
         <span>SEBI Reg. No:INZ000247736 CDSL Reg. No:INDPCDSL2082003</span>
       </p>
       <button class="btn" id="mobileContinue" disabled onclick="onMobilePrimaryClick()">Continue</button>
@@ -833,13 +832,18 @@ let history = ['screen-splash'];
 
 function goTo(id, replace){
   if(id !== 'screen-intro') clearIntroAutoplay();
+  if(id !== 'screen-otp') clearOtpAutofill();
+  if(id !== 'screen-ekyc') clearEkycAutofill();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const hideRestart = ['screen-splash','screen-intro','screen-ekyc-start','screen-ekyc'].includes(id);
   document.querySelector('.restart-btn').style.display = hideRestart ? 'none' : 'flex';
   if(replace){ history[history.length-1] = id; } else { history.push(id); }
   window.scrollTo(0,0);
-  if(id === 'screen-otp') startOtpCountdown();
+  if(id === 'screen-otp'){
+    startOtpCountdown();
+    scheduleOtpAutofill();
+  }
 }
 
 function restartFlow(){
@@ -1203,6 +1207,38 @@ const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
 const otpContinue = document.getElementById('otpContinue');
 const resendOtpBtn = document.getElementById('resendOtpBtn');
 let otpResendTimer;
+let otpAutofillTimers = [];
+
+function clearOtpAutofill(){
+  otpAutofillTimers.forEach(timer=>clearTimeout(timer));
+  otpAutofillTimers = [];
+}
+
+function scheduleOtpAutofill(){
+  clearOtpAutofill();
+  otpBoxes.forEach(box=>{
+    box.value = '';
+    box.classList.remove('filled', 'bounce');
+  });
+  checkOtpComplete();
+  const digits = ['1','8','4','6','2','9'];
+  digits.forEach((digit, index)=>{
+    const timer = setTimeout(()=>{
+      otpBoxes[index].value = digit;
+      otpBoxes[index].classList.add('filled', 'bounce');
+      checkOtpComplete();
+      if(index === digits.length - 1){
+        const confirmTimer = setTimeout(()=>{
+          if(document.getElementById('screen-otp').classList.contains('active') && !otpContinue.disabled){
+            otpContinue.click();
+          }
+        }, 350);
+        otpAutofillTimers.push(confirmTimer);
+      }
+    }, 1200 + (index * 180));
+    otpAutofillTimers.push(timer);
+  });
+}
 
 function startOtpCountdown(){
   clearInterval(otpResendTimer);
@@ -1272,6 +1308,12 @@ function scheduleEkycOtpAutofill(){
       if(index === digits.length - 1){
         continueBtn.disabled = false;
         continueBtn.classList.add('enabled');
+        const continueTimer = setTimeout(()=>{
+          if(document.getElementById('screen-ekyc').classList.contains('active') && !continueBtn.disabled){
+            continueBtn.click();
+          }
+        }, 350);
+        ekycAutofillTimers.push(continueTimer);
       }
     }, 2400 + (index * 180));
     ekycAutofillTimers.push(timer);
