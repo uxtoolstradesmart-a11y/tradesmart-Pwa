@@ -124,19 +124,9 @@
     gsap.set('#hand',{x:0, y:0, rotation:0, opacity:1});
   }
 
-  let idles=[];
-  const killIdles=()=>{idles.forEach(t=>t.kill());idles=[];};
-  function startIdles(){
-    killIdles();
-    idles.push(gsap.to('#art svg',{y:'-=7', rotationX:-3, duration:3.4, ease:'sine.inOut', yoyo:true, repeat:-1}));
-    idles.push(gsap.to('#bar3',{opacity:.82, duration:1.2, ease:'sine.inOut', yoyo:true, repeat:-1}));
-    idles.push(gsap.fromTo('#glare',{x:-120},{x:240, duration:1.3, ease:'power2.inOut', repeat:-1, repeatDelay:5.5}));
-  }
-
   function play(){
-    killIdles();
     setStart();
-    const tl = gsap.timeline({defaults:{ease:'power3.out'}, onComplete:startIdles});
+    const tl = gsap.timeline({defaults:{ease:'power3.out'}, onComplete:setEnd});
 
     tl.to('#art svg',{opacity:1, y:0, scale:1, rotationX:0, duration:1.05, ease:'expo.out'}, .05);
     tl.to('.row',{opacity:1, y:0, duration:.4, stagger:.07}, .55);

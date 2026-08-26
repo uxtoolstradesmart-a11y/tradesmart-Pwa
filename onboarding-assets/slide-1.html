@@ -8,7 +8,7 @@
   MOTION DESIGN
    • Entrance (once): each badge arcs in from its own direction with a
      slight rotation, overshoots, then settles. Staggered blue→teal→amber.
-   • Float (infinite): each badge drifts along its OWN looping path (a slow
+   • Float (one-shot): each badge drifts along its OWN path (a slow
      organic meander, not a synced bob). Amplitude encodes depth — large
      blue moves most ("closest"), amber least ("farthest").
    • Specular glint: a soft highlight sweeps across each disc on a staggered
@@ -115,18 +115,18 @@
     88%  { transform:translate(1.5px,-3px)  rotate(-.5deg); }
     100% { transform:translate(0,0)         rotate(0); }
   }
-  .bob--blue  { animation:floatBlue  11s ease-in-out -2s infinite; }
-  .bob--teal  { animation:floatTeal  9.5s ease-in-out -5s infinite; }
-  .bob--amber { animation:floatAmber 13s ease-in-out -1s infinite; }
+  .bob--blue  { animation:floatBlue  11s ease-in-out -2s 1 both; }
+  .bob--teal  { animation:floatTeal  9.5s ease-in-out -5s 1 both; }
+  .bob--amber { animation:floatAmber 13s ease-in-out -1s 1 both; }
 
   /* ---------- Halo breathe (off-phase) ---------- */
   @keyframes breathe{
     from{ transform:scale(1);    opacity:.5; }
     to  { transform:scale(1.07); opacity:.32; }
   }
-  .halo--blue  { animation:breathe 5.5s ease-in-out  0s   infinite alternate; }
-  .halo--teal  { animation:breathe 4.7s ease-in-out -1.0s infinite alternate; }
-  .halo--amber { animation:breathe 6.3s ease-in-out -2.0s infinite alternate; }
+  .halo--blue  { animation:breathe 5.5s ease-in-out  0s   1 both; }
+  .halo--teal  { animation:breathe 4.7s ease-in-out -1.0s 1 both; }
+  .halo--amber { animation:breathe 6.3s ease-in-out -2.0s 1 both; }
 
   /* ---------- Specular glint — staggered sweep, clipped to disc ---------- */
   @keyframes glintBlue{
@@ -150,9 +150,9 @@
     15%  { transform:translateX(56px)  rotate(20deg); opacity:0; }
     100% { transform:translateX(56px)  rotate(20deg); opacity:0; }
   }
-  .glint--blue  { animation:glintBlue  9s ease-in-out 1.5s infinite backwards; }
-  .glint--teal  { animation:glintTeal  9s ease-in-out 4.5s infinite backwards; }
-  .glint--amber { animation:glintAmber 9s ease-in-out 7.5s infinite backwards; }
+  .glint--blue  { animation:glintBlue  9s ease-in-out 1.5s 1 both; }
+  .glint--teal  { animation:glintTeal  9s ease-in-out 4.5s 1 both; }
+  .glint--amber { animation:glintAmber 9s ease-in-out 7.5s 1 both; }
 
   /* ---------- Accessibility: respect reduced motion ---------- */
   @media (prefers-reduced-motion: reduce){

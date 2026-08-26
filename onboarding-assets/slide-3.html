@@ -235,7 +235,7 @@
     const topLines = svg.querySelectorAll('#bubble-top .type-line');
     const botLines = svg.querySelectorAll('#bubble-bottom .type-line');
 
-    let intro, ambient = [];
+    let intro;
 
     // Drop the whole scene into its resting "all visible" state.
     function showFinal() {
@@ -255,8 +255,6 @@
     // Kill any running ambient/intro so Replay starts clean.
     function clearAll() {
       if (intro) intro.kill();
-      ambient.forEach(t => t.kill());
-      ambient = [];
     }
 
     function setInitial() {
@@ -274,38 +272,6 @@
       gsap.set('#live-ping', { opacity: 0, transformOrigin: '50% 50%' });
     }
 
-    // Continuous "this is live" behaviours: ping, breathing float, ongoing typing.
-    function startAmbient() {
-      // online ping
-      ambient.push(
-        gsap.fromTo('#live-ping',
-          { scale: 0.7, opacity: 0.55 },
-          { scale: 2.8, opacity: 0, duration: 1.9, ease: 'power2.out', repeat: -1, transformOrigin: '50% 50%' })
-      );
-      // gentle breathing of the three actors (different periods = organic)
-      ambient.push(gsap.to('#agent',         { y: '-=3',   duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1 }));
-      ambient.push(gsap.to('#bubble-top',    { y: '-=2.5', duration: 2.9, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.35 }));
-      ambient.push(gsap.to('#bubble-bottom', { y: '+=2.5', duration: 3.1, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.6 }));
-      ambient.push(gsap.to('#customer',      { y: '-=2',   duration: 3.3, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 0.5 }));
-
-      // ongoing conversation: customer types a reply, then the rep follows, forever.
-      const chat = gsap.timeline({ repeat: -1, delay: 2.4 });
-      chat
-        // — customer replies —
-        .set(botLines, { scaleX: 0 })
-        .to('#bubble-bottom', { scale: 1.045, duration: 0.16, transformOrigin: '6% 100%', ease: 'power2.out' })
-        .to('#bubble-bottom', { scale: 1, duration: 0.32, ease: 'power2.out' })
-        .to(botLines, { scaleX: 1, duration: 0.42, stagger: 0.16, ease: 'power2.out' }, '<')
-        .to({}, { duration: 1.8 })
-        // — rep answers —
-        .set(topLines, { scaleX: 0 })
-        .to('#bubble-top', { scale: 1.045, duration: 0.16, transformOrigin: '88% 100%', ease: 'power2.out' })
-        .to('#bubble-top', { scale: 1, duration: 0.32, ease: 'power2.out' })
-        .to(topLines, { scaleX: 1, duration: 0.42, stagger: 0.16, ease: 'power2.out' }, '<')
-        .to({}, { duration: 1.8 });
-      ambient.push(chat);
-    }
-
     function play() {
       if (reduce) { showFinal(); return; }
       clearAll();
@@ -313,7 +279,7 @@
 
       intro = gsap.timeline({
         defaults: { ease: 'power3.out' },
-        onComplete: startAmbient
+        onComplete: showFinal
       });
 
       intro

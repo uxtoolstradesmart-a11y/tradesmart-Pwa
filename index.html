@@ -271,13 +271,13 @@
   }
 
   /* ---------- splash + onboarding ---------- */
-  #screen-splash{padding:0; align-items:stretch; justify-content:stretch;}
-  .splash-frame{width:100%; height:100%; border:0; background:#fff;}
+  #screen-splash{height:100vh; height:var(--app-height,100dvh); padding:0; align-items:stretch; justify-content:stretch;}
+  .splash-frame{position:absolute; inset:0; display:block; width:100%; height:100%; border:0; background:#fff;}
   #screen-intro{padding:0; overflow:hidden; background:#fff;}
-  .intro-logo{height:116px; flex:none; display:flex; align-items:center; justify-content:center;}
+  .intro-logo{height:104px; flex:none; display:flex; align-items:center; justify-content:center;}
   .intro-logo svg{width:104px; height:auto;}
-  .intro-panel{min-height:0; flex:1; display:flex; flex-direction:column; padding:50px 24px 18px; background:#fff;}
-  .intro-art{height:330px; flex:none; overflow:hidden; touch-action:pan-y;}
+  .intro-panel{min-height:0; flex:1; display:flex; flex-direction:column; justify-content:center; padding:16px 24px 18px; background:#fff;}
+  .intro-art{height:350px; flex:none; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:pan-y;}
   .intro-art iframe{width:100%; height:100%; border:0; display:block; background:transparent; pointer-events:none;}
   .intro-copy{text-align:center; min-height:82px; display:flex; flex-direction:column; justify-content:flex-start;}
   .intro-copy h2{margin:0; color:#111; font-size:20px; line-height:26px; font-weight:600;}
@@ -285,14 +285,15 @@
   .intro-dots{height:30px; display:flex; align-items:center; justify-content:center; gap:5px;}
   .intro-dot{width:6px; height:6px; padding:0; border:0; border-radius:50%; background:#A8A8A8; cursor:pointer; transition:width .2s,background .2s;}
   .intro-dot.active{width:14px; border-radius:6px; background:#777;}
-  .intro-actions{margin-top:auto; display:flex; flex-direction:column; gap:8px;}
+  .intro-actions{margin-top:18px; display:flex; flex-direction:column; gap:8px;}
   .intro-actions .btn{height:50px;}
   .intro-login{background:#fff; color:var(--blue); border:1px solid var(--blue);}
   @media(max-height:760px){
-    .intro-logo{height:90px;}
-    .intro-panel{padding-top:24px;}
-    .intro-art{height:270px;}
+    .intro-logo{height:82px;}
+    .intro-panel{padding-top:10px; padding-bottom:12px;}
+    .intro-art{height:300px;}
     .intro-copy{min-height:72px;}
+    .intro-actions{margin-top:12px;}
   }
 
   /* ---------- OTP ---------- */
@@ -831,6 +832,7 @@ const state = { mobile:'', isNewUser:false, userId:'', pan:'', otpFlow:'', entry
 let history = ['screen-splash'];
 
 function goTo(id, replace){
+  if(id !== 'screen-intro') clearIntroAutoplay();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   const hideRestart = ['screen-splash','screen-intro','screen-ekyc-start','screen-ekyc'].includes(id);
@@ -914,6 +916,20 @@ const introSlides = [
 ];
 let introIndex = 0;
 let introPointerStartX = 0;
+let introAutoTimer;
+const INTRO_SLIDE_DELAY = 3000;
+
+function clearIntroAutoplay(){
+  clearTimeout(introAutoTimer);
+}
+
+function scheduleIntroAdvance(){
+  clearIntroAutoplay();
+  if(!document.getElementById('screen-intro').classList.contains('active')) return;
+  introAutoTimer = setTimeout(()=>{
+    showIntroSlide((introIndex + 1) % introSlides.length);
+  }, INTRO_SLIDE_DELAY);
+}
 
 function openIntroSlides(){
   goTo('screen-intro');
@@ -932,6 +948,7 @@ function showIntroSlide(index){
   const frame = document.getElementById('introFrame');
   frame.title = slide.title;
   frame.src = slide.asset;
+  scheduleIntroAdvance();
 }
 
 function prepareIntroFrame(frame){
@@ -979,12 +996,16 @@ introSlides.forEach((slide, index)=>{
   introDots.appendChild(dot);
 });
 const introArt = document.getElementById('introArt');
-introArt.addEventListener('pointerdown', event=>{ introPointerStartX = event.clientX; });
+introArt.addEventListener('pointerdown', event=>{
+  clearIntroAutoplay();
+  introPointerStartX = event.clientX;
+});
 introArt.addEventListener('pointerup', event=>{
   const distance = event.clientX - introPointerStartX;
-  if(Math.abs(distance) < 40) return;
+  if(Math.abs(distance) < 40){ scheduleIntroAdvance(); return; }
   if(distance < 0 && introIndex < introSlides.length - 1) showIntroSlide(introIndex + 1);
   if(distance > 0 && introIndex > 0) showIntroSlide(introIndex - 1);
+  if((distance < 0 && introIndex === introSlides.length - 1) || (distance > 0 && introIndex === 0)) scheduleIntroAdvance();
 });
 
 setTimeout(()=>{ if(document.getElementById('screen-splash').classList.contains('active')) openIntroSlides(); }, 2200);
