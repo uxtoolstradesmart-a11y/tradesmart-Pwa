@@ -277,11 +277,12 @@
   .intro-logo{height:104px; flex:none; display:flex; align-items:center; justify-content:center;}
   .intro-logo svg{width:104px; height:auto;}
   .intro-panel{min-height:0; flex:1; display:flex; flex-direction:column; justify-content:center; padding:16px 24px 18px; background:#fff;}
+  .intro-hero{transform:translateY(40px);}
   .intro-art{height:350px; flex:none; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:pan-y;}
   .intro-art iframe{width:100%; height:100%; border:0; display:block; background:transparent; pointer-events:none;}
   .intro-copy{text-align:center; min-height:82px; display:flex; flex-direction:column; justify-content:flex-start;}
   .intro-copy h2{margin:0; color:#111; font-size:20px; line-height:26px; font-weight:600;}
-  .intro-copy p{margin:4px auto 0; max-width:330px; color:var(--grey-555); font-size:14px; line-height:19px;}
+  .intro-copy p{margin:4px auto 0; max-width:220px; color:var(--grey-555); font-size:14px; line-height:19px;}
   .intro-dots{height:30px; display:flex; align-items:center; justify-content:center; gap:5px;}
   .intro-dot{width:6px; height:6px; padding:0; border:0; border-radius:50%; background:#A8A8A8; cursor:pointer; transition:width .2s,background .2s;}
   .intro-dot.active{width:14px; border-radius:6px; background:#777;}
@@ -447,14 +448,16 @@
     <section class="screen" id="screen-intro">
       <div class="intro-logo"><svg viewBox="0 0 140 50" fill="none" xmlns="http://www.w3.org/2000/svg"><use href="#logo-mark"/></svg></div>
       <div class="intro-panel" id="introPanel">
-        <div class="intro-art" id="introArt">
-          <iframe id="introFrame" title="TradeSmart onboarding illustration" onload="window.prepareIntroFrame && prepareIntroFrame(this)"></iframe>
+        <div class="intro-hero">
+          <div class="intro-art" id="introArt">
+            <iframe id="introFrame" title="TradeSmart onboarding illustration" onload="window.prepareIntroFrame && prepareIntroFrame(this)"></iframe>
+          </div>
+          <div class="intro-copy">
+            <h2 id="introTitle"></h2>
+            <p id="introDescription"></p>
+          </div>
+          <div class="intro-dots" id="introDots" aria-label="Onboarding slides"></div>
         </div>
-        <div class="intro-copy">
-          <h2 id="introTitle"></h2>
-          <p id="introDescription"></p>
-        </div>
-        <div class="intro-dots" id="introDots" aria-label="Onboarding slides"></div>
         <div class="intro-actions">
           <button class="btn enabled" onclick="startOpenAccountFlow()">Open Demat A/C</button>
           <button class="btn intro-login" onclick="enterLoginFlow()">Login</button>
@@ -648,7 +651,7 @@
       <h1 class="screen-title">Lets reset your Password!</h1>
       <div class="field-group">
         <div class="field-wrap">
-          <label class="field-label">Current Password</label>
+          <label class="field-label hide" id="curPwLabel">Current Password</label>
           <div class="field-box">
             <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
             <div class="field-divider"></div>
@@ -659,7 +662,7 @@
           </div>
         </div>
         <div class="field-wrap">
-          <label class="field-label">New Password</label>
+          <label class="field-label hide" id="newPwLabel">New Password</label>
           <div class="field-box">
             <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
             <div class="field-divider"></div>
@@ -677,7 +680,7 @@
           <div class="check-item" id="rule5"><svg viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><circle class="badge" cx="12" cy="12" r="10"/><path class="tick" d="M7.5 12.3l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/><path class="cross" d="M8.5 8.5l7 7M15.5 8.5l-7 7" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg><span>Can&rsquo;t match last 3 passwords</span></div>
         </div>
         <div class="field-wrap">
-          <label class="field-label">Confirm New Password</label>
+          <label class="field-label hide" id="confirmPwLabel">Confirm New Password</label>
           <div class="field-box" id="confirmPwBox">
             <svg class="field-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a5 5 0 00-5 5v3H6a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2v-8a2 2 0 00-2-2h-1V7a5 5 0 00-5-5zm-3 5a3 3 0 116 0v3H9V7zm3 7a2 2 0 110 4 2 2 0 010-4z"/></svg>
             <div class="field-divider"></div>
@@ -921,7 +924,7 @@ const introSlides = [
 let introIndex = 0;
 let introPointerStartX = 0;
 let introAutoTimer;
-const INTRO_SLIDE_DELAY = 3500;
+const INTRO_SLIDE_DELAY = 4000;
 
 function clearIntroAutoplay(){
   clearTimeout(introAutoTimer);
@@ -1499,12 +1502,25 @@ const curPwEl = document.getElementById('curPw');
 const newPwEl = document.getElementById('newPw');
 const confirmPwEl = document.getElementById('confirmPw');
 const saveChangesBtnEl = document.getElementById('saveChangesBtn');
+const curPwLabel = document.getElementById('curPwLabel');
+const newPwLabel = document.getElementById('newPwLabel');
+const confirmPwLabel = document.getElementById('confirmPwLabel');
+function updatePwFieldLabel(input, label){
+  label.classList.toggle('hide', document.activeElement !== input && input.value.length === 0);
+}
+[[curPwEl, curPwLabel], [newPwEl, newPwLabel], [confirmPwEl, confirmPwLabel]].forEach(([input, label])=>{
+  updatePwFieldLabel(input, label);
+  input.addEventListener('focus', ()=>updatePwFieldLabel(input, label));
+  input.addEventListener('input', ()=>updatePwFieldLabel(input, label));
+  input.addEventListener('blur', ()=>updatePwFieldLabel(input, label));
+});
 onEnterKey(curPwEl, ()=>newPwEl.focus());
 onEnterKey(confirmPwEl, ()=>{ if(!saveChangesBtnEl.disabled) saveChangesBtnEl.click(); });
 newPwEl.addEventListener('focus', validateNewPassword);
 newPwEl.addEventListener('blur', validateNewPassword);
 newPwEl.addEventListener('focus', ()=>keepFocusedControlVisible(newPwEl));
 confirmPwEl.addEventListener('focus', ()=>keepFocusedControlVisible(confirmPwEl));
+curPwEl.addEventListener('focus', ()=>keepFocusedControlVisible(curPwEl));
 
 function onSaveChanges(){
   document.getElementById('successHeading').textContent = 'Password updated!';
