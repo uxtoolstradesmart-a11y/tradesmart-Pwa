@@ -1,4 +1,4 @@
-const CACHE = 'tradesmart-login-pwa-v25';
+const CACHE = 'tradesmart-login-pwa-v26';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './icons/icon.svg',
   './icons/open-account.svg',
   './icons/temporary-password.svg',
+  './icons/ekyc-start-device.png',
   './onboarding-assets/splash.html',
   './onboarding-assets/slide-1.html',
   './onboarding-assets/slide-2.html',
