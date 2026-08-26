@@ -192,7 +192,9 @@
   .info-card svg{width:32px;height:32px;flex:none;color:var(--blue);}
   .info-card-title{font-size:16px;font-weight:500;color:#0a0600;margin:0 0 3px 0;}
   .info-card-desc{font-size:13.7px;line-height:18px;color:var(--grey-555);margin:0;font-family:'Roboto',sans-serif;}
-  #screen-temp-sent .info-card{padding:0; border:0; background:none; margin-top:0;}
+  #screen-temp-sent .info-card{margin-top:0; cursor:default;}
+  .info-card-icon{width:32px;height:32px;flex:none;border-radius:50%;background:var(--blue);display:flex;align-items:center;justify-content:center;}
+  .info-card-icon svg{width:16px;height:16px;}
 
   /* Later screens use the compact header from the updated mobile designs. */
   #screen-otp .brand-header,
@@ -636,7 +638,15 @@
             <input type="text" id="sentPan" readonly style="font-weight:600;color:var(--grey-333);">
           </div>
         </div>
-        <div class="info-card"><img class="demat-card-image" src="./icons/temporary-password.svg" alt="Temporary password sent"></div>
+        <div class="info-card" role="status">
+          <span class="info-card-icon">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M4 12l5 5L20 6" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <div>
+            <p class="info-card-title">Temporary Password Sent!</p>
+            <p class="info-card-desc">Check your mobile number or email and login in.</p>
+          </div>
+        </div>
       </div>
       <div class="spacer"></div>
       <button class="btn enabled" onclick="goToTempLogin()">Login</button>
