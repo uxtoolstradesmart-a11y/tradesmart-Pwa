@@ -285,7 +285,7 @@
   .intro-dots{height:30px; display:flex; align-items:center; justify-content:center; gap:5px;}
   .intro-dot{width:6px; height:6px; padding:0; border:0; border-radius:50%; background:#A8A8A8; cursor:pointer; transition:width .2s,background .2s;}
   .intro-dot.active{width:14px; border-radius:6px; background:#777;}
-  .intro-actions{margin-top:18px; display:flex; flex-direction:column; gap:8px;}
+  .intro-actions{margin-top:auto; padding-top:18px; display:flex; flex-direction:column; gap:8px;}
   .intro-actions .btn{height:50px;}
   .intro-login{background:#fff; color:var(--blue); border:1px solid var(--blue);}
   @media(max-height:760px){
@@ -293,7 +293,7 @@
     .intro-panel{padding-top:10px; padding-bottom:12px;}
     .intro-art{height:300px;}
     .intro-copy{min-height:72px;}
-    .intro-actions{margin-top:12px;}
+    .intro-actions{padding-top:12px;}
   }
 
   /* ---------- OTP ---------- */
@@ -917,7 +917,7 @@ const introSlides = [
 let introIndex = 0;
 let introPointerStartX = 0;
 let introAutoTimer;
-const INTRO_SLIDE_DELAY = 3000;
+const INTRO_SLIDE_DELAY = 3500;
 
 function clearIntroAutoplay(){
   clearTimeout(introAutoTimer);
