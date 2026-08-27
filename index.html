@@ -281,7 +281,7 @@
   .intro-panel{min-height:0; flex:1; display:flex; flex-direction:column; justify-content:center; padding:16px 24px 18px; background:#fff;}
   .intro-hero{transform:translateY(40px);}
   .intro-art{height:350px; flex:none; display:flex; align-items:center; justify-content:center; overflow:hidden; touch-action:pan-y;}
-  .intro-art iframe{width:100%; height:100%; border:0; display:block; background:transparent; pointer-events:none;}
+  .intro-art img{width:100%; height:100%; display:block; object-fit:contain; object-position:center; pointer-events:none;}
   .intro-copy{text-align:center; min-height:82px; display:flex; flex-direction:column; justify-content:flex-start;}
   .intro-copy h2{margin:0; color:#111; font-size:20px; line-height:26px; font-weight:600;}
   .intro-copy p{margin:4px auto 0; max-width:220px; color:var(--grey-555); font-size:14px; line-height:19px;}
@@ -452,7 +452,7 @@
       <div class="intro-panel" id="introPanel">
         <div class="intro-hero">
           <div class="intro-art" id="introArt">
-            <iframe id="introFrame" title="TradeSmart onboarding illustration" onload="window.prepareIntroFrame && prepareIntroFrame(this)"></iframe>
+            <img id="introImage" alt="" draggable="false">
           </div>
           <div class="intro-copy">
             <h2 id="introTitle"></h2>
@@ -906,29 +906,34 @@ function keepFocusedControlVisible(el){
 /* ---------------- splash + onboarding slides ---------------- */
 const introSlides = [
   {
-    asset:'./onboarding-assets/slide-1.html',
+    asset:'./onboarding-assets/intro-slide-1.svg',
     title:'Lowest Brokerage/Order',
     description:'Enjoy cost-effective trading with no hidden charges.'
   },
   {
-    asset:'./onboarding-assets/slide-2.html',
+    asset:'./onboarding-assets/intro-slide-2.svg',
     title:'30 years of expertise',
     description:'Trusted by 200000+ traders across India.'
   },
   {
-    asset:'./onboarding-assets/slide-3.html',
+    asset:'./onboarding-assets/intro-slide-3.svg',
     title:'Live Support',
     description:'Instant support through WhatsApp, live chat, phone, or email.'
   },
   {
-    asset:'./onboarding-assets/slide-4.html',
+    asset:'./onboarding-assets/intro-slide-4.png',
     title:'Advanced Order Types',
     description:'Access Cash, F&O, Cover Order, Bracket Order, GTT, Iceberg & more'
   },
   {
-    asset:'./onboarding-assets/slide-5.html',
-    title:'Seamless Trading',
-    description:'User-friendly design, fast. Trade in a few taps'
+    asset:'./onboarding-assets/intro-slide-5.png',
+    title:'Smarter Stop Loss',
+    description:'Lock in gains automatically as the market moves in your favor.'
+  },
+  {
+    asset:'./onboarding-assets/intro-slide-6.png',
+    title:'Smart Order Slicing',
+    description:'Automatically split large orders into smaller quantities for smoother execution.'
   }
 ];
 let introIndex = 0;
@@ -962,33 +967,10 @@ function showIntroSlide(index){
     dot.classList.toggle('active', dotIndex === introIndex);
     dot.setAttribute('aria-current', dotIndex === introIndex ? 'true' : 'false');
   });
-  const frame = document.getElementById('introFrame');
-  frame.title = slide.title;
-  frame.src = slide.asset;
+  const image = document.getElementById('introImage');
+  image.alt = slide.title;
+  image.src = slide.asset;
   scheduleIntroAdvance();
-}
-
-function prepareIntroFrame(frame){
-  try{
-    const doc = frame.contentDocument;
-    if(!doc || !doc.body) return;
-    const style = doc.createElement('style');
-    style.textContent = `
-      html,body{height:100%!important;min-height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important;background:transparent!important}
-      .replay,.controls,.hint{display:none!important}
-      .card,.scene{box-shadow:none!important;background:transparent!important}
-      .card{padding:0!important}
-    `;
-    doc.head.appendChild(style);
-    if(!frame.contentWindow.gsap){
-      const scene = doc.querySelector('.scene svg');
-      const art = doc.querySelector('#art svg');
-      if(scene) scene.style.visibility = 'visible';
-      if(art){ art.style.opacity = '1'; art.style.transform = 'none'; }
-    }
-  }catch(error){
-    // If iframe styling is unavailable, the supplied standalone slide still renders.
-  }
 }
 
 function enterLoginFlow(){

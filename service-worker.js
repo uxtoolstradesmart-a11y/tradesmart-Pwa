@@ -1,4 +1,4 @@
-const CACHE = 'tradesmart-login-pwa-v36';
+const CACHE = 'tradesmart-login-pwa-v37';
 const APP_SHELL = [
   './',
   './index.html',
@@ -7,11 +7,12 @@ const APP_SHELL = [
   './icons/open-account.svg',
   './icons/ekyc-start-device.png',
   './onboarding-assets/splash.html',
-  './onboarding-assets/slide-1.html',
-  './onboarding-assets/slide-2.html',
-  './onboarding-assets/slide-3.html',
-  './onboarding-assets/slide-4.html',
-  './onboarding-assets/slide-5.html'
+  './onboarding-assets/intro-slide-1.svg',
+  './onboarding-assets/intro-slide-2.svg',
+  './onboarding-assets/intro-slide-3.svg',
+  './onboarding-assets/intro-slide-4.png',
+  './onboarding-assets/intro-slide-5.png',
+  './onboarding-assets/intro-slide-6.png'
 ];
 
 self.addEventListener('install', event => {
