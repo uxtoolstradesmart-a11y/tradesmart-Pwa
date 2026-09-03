@@ -168,10 +168,6 @@
   }
   .result-block.show{max-height:420px; opacity:1; margin-top:16px;}
 
-  .helper-row{display:flex; align-items:center; gap:4px; justify-content:flex-start; margin-top:8px;}
-  .helper-row svg{width:16px;height:16px;color:var(--grey-777);flex:none;}
-  .helper-row span{font-family:'Source Sans 3',sans-serif; font-size:14px; color:var(--grey-777);}
-
   .error-row{display:flex; align-items:center; gap:4px; margin-top:8px;}
   .error-row svg{width:16px;height:16px;color:var(--red);flex:none;}
   .error-row span{font-family:'Source Sans 3',sans-serif; font-size:14px; color:var(--red);}
@@ -458,7 +454,6 @@
   .account-sheet-hero{width:120px;height:120px;display:block;margin:0 auto;object-fit:contain;}
   .account-sheet h2{margin:-1px 0 0;color:#0a0600;font-size:20px;line-height:25px;font-weight:500;}
   .account-sheet h2 strong{color:var(--blue);font-weight:700;}
-  .account-sheet-copy{width:min(303px,100%);margin:12px auto 0;color:var(--grey-777);font-size:16px;line-height:18px;}
   .account-steps{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:36px 18px 0;}
   .account-steps::before{
     content:"";position:absolute;z-index:0;top:12px;left:12.5%;right:12.5%;
@@ -552,10 +547,6 @@
             <circle cx="12" cy="12" r="10" fill="#079A80"/>
             <path d="M7.5 12.4l3 3 6-6.2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-        </div>
-        <div class="helper-row" id="mobileHelper">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 4 5v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V5l-8-3zm-1.1 14.2L7.4 12.7l1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3z"/></svg>
-          <span>We will check if your account already exists.</span>
         </div>
         <button class="try-another" id="tryAnotherBtn" style="display:none;" onclick="resetToMobileEntry()">Try another Number</button>
       </div>
@@ -877,10 +868,9 @@
   </div>
 
   <div class="account-overlay" id="accountOverlay" aria-hidden="true">
-    <section class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-labelledby="accountSheetTitle" aria-describedby="accountSheetDescription">
+    <section class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-labelledby="accountSheetTitle">
       <img class="account-sheet-hero" src="./icons/new-account-user.png" alt="">
       <h2 id="accountSheetTitle">New to TradeSmart?<br>Let&rsquo;s open your <strong>Demat account</strong></h2>
-      <p class="account-sheet-copy" id="accountSheetDescription">Quick, paperless and secure onboarding to begin your investing journey.</p>
 
       <div class="account-steps" aria-label="Account opening steps">
         <div class="account-step"><span class="account-step-number">1</span><span>Verify</span></div>
@@ -1105,7 +1095,6 @@ const mobileSpinner = document.getElementById('mobileSpinner');
 const mobileVerifiedIcon = document.getElementById('mobileVerifiedIcon');
 const mobileContinue = document.getElementById('mobileContinue');
 const mobileHeading = document.getElementById('mobileHeading');
-const mobileHelper = document.getElementById('mobileHelper');
 const mobileLegal = document.getElementById('mobileLegal');
 const tryAnotherBtn = document.getElementById('tryAnotherBtn');
 const passwordBlock = document.getElementById('passwordBlock');
@@ -1190,7 +1179,6 @@ function resetToMobileEntry(){
   mobileBox.classList.remove('verified');
   updateMobileLabel();
   mobileHeading.textContent = "Let\u2019s get started!";
-  mobileHelper.style.display='flex';
   tryAnotherBtn.style.display='none';
   mobileLegal.style.display='block';
   passwordBlock.classList.remove('show');
@@ -1233,7 +1221,6 @@ function showVerifyResult(){
   mobileSpinner.style.display = 'none';
   mobileVerifiedIcon.style.display = 'flex';
   mobileBox.classList.add('verified');
-  mobileHelper.style.display = 'none';
   state.isNewUser = state.entryIntent === 'open-account' || state.mobile === '9999999999';
   if(state.isNewUser){
     mobileStep = 'no-account';
