@@ -1,4 +1,4 @@
-const CACHE = 'tradesmart-login-pwa-v38';
+const CACHE = 'tradesmart-login-pwa-v40';
 const APP_SHELL = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const APP_SHELL = [
   './onboarding-assets/splash.html',
   './onboarding-assets/intro-slide-1.svg',
   './onboarding-assets/intro-slide-2.svg',
-  './onboarding-assets/intro-slide-3.svg',
+  './onboarding-assets/intro-slide-3.png',
   './onboarding-assets/intro-slide-4.png',
   './onboarding-assets/intro-slide-5.png',
   './onboarding-assets/intro-slide-6.png'
