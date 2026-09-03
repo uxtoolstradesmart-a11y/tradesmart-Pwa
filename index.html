@@ -430,6 +430,66 @@
   .success-wrap svg{width:64px;height:64px;color:var(--green);}
   .success-wrap h2{font-size:20px;margin:0;}
   .success-wrap p{font-size:14px;color:var(--grey-555);margin:0; max-width:280px; line-height:1.5;}
+
+  /* ---------- unregistered-number account prompt ---------- */
+  .account-overlay{
+    position:absolute; inset:0; z-index:60;
+    display:flex; align-items:flex-end;
+    background:rgba(0,0,0,0.2);
+    -webkit-backdrop-filter:blur(2px); backdrop-filter:blur(2px);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .7s ease, visibility 0s linear .82s;
+  }
+  .account-overlay.show{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity .7s ease, visibility 0s;
+  }
+  .account-sheet{
+    width:100%; max-height:calc(100% - 48px);
+    overflow-y:auto; overscroll-behavior:contain;
+    padding:28px 16px calc(20px + env(safe-area-inset-bottom));
+    border-radius:32px 32px 0 0;
+    background:linear-gradient(180deg,#fff 0%,#fff 82%,#f4f7ff 100%);
+    text-align:center;
+    transform:translateY(105%);
+    transition:transform .82s cubic-bezier(.22,1,.36,1);
+  }
+  .account-overlay.show .account-sheet{transform:translateY(0);}
+  .account-sheet-hero{width:120px;height:120px;display:block;margin:0 auto;object-fit:contain;}
+  .account-sheet h2{margin:-1px 0 0;color:#0a0600;font-size:20px;line-height:25px;font-weight:500;}
+  .account-sheet h2 strong{color:var(--blue);font-weight:700;}
+  .account-sheet-copy{width:min(303px,100%);margin:12px auto 0;color:var(--grey-777);font-size:16px;line-height:18px;}
+  .account-steps{position:relative;display:grid;grid-template-columns:repeat(3,1fr);margin:36px 18px 0;}
+  .account-steps::before{
+    content:"";position:absolute;z-index:0;top:12px;left:12.5%;right:12.5%;
+    border-top:1px dashed rgba(63,113,235,.55);
+  }
+  .account-step{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--grey-777);font-size:14px;line-height:18px;}
+  .account-step-number{
+    width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:#f8f8f8;color:var(--grey-555);font-size:14px;font-weight:500;
+    box-shadow:0 2px 5px rgba(0,0,0,.1);
+  }
+  .account-step:first-child .account-step-number{
+    color:#fff;background:var(--blue);box-shadow:0 0 0 2px #fff,0 0 0 3px var(--blue);
+  }
+  .account-sheet-actions{margin-top:36px;}
+  .account-sheet-legal{margin:0 0 12px;color:var(--grey-555);font-family:'Source Sans 3',sans-serif;font-size:14px;line-height:18px;}
+  .account-legal-link{border:0;padding:0;background:none;color:inherit;font:inherit;text-decoration:underline;cursor:pointer;}
+  .account-sheet .btn{background:var(--blue);}
+  .account-sheet-secondary{
+    margin-top:12px;border:0;padding:0;background:none;color:var(--blue);
+    font-family:'Source Sans 3',sans-serif;font-size:16px;line-height:20px;cursor:pointer;
+  }
+  @media(max-height:760px){
+    .account-sheet{padding-top:18px;}
+    .account-sheet-hero{width:94px;height:94px;}
+    .account-steps{margin-top:24px;}
+    .account-sheet-actions{margin-top:24px;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .account-overlay,.account-sheet{transition-duration:.01ms;}
+  }
 </style>
 </head>
 <body>
@@ -815,6 +875,26 @@
     </section>
 
   </div>
+
+  <div class="account-overlay" id="accountOverlay" aria-hidden="true">
+    <section class="account-sheet" id="accountSheet" role="dialog" aria-modal="true" aria-labelledby="accountSheetTitle" aria-describedby="accountSheetDescription">
+      <img class="account-sheet-hero" src="./icons/new-account-user.png" alt="">
+      <h2 id="accountSheetTitle">New to TradeSmart?<br>Let&rsquo;s open your <strong>Demat account</strong></h2>
+      <p class="account-sheet-copy" id="accountSheetDescription">Quick, paperless and secure onboarding to begin your investing journey.</p>
+
+      <div class="account-steps" aria-label="Account opening steps">
+        <div class="account-step"><span class="account-step-number">1</span><span>Verify</span></div>
+        <div class="account-step"><span class="account-step-number">2</span><span>Open Account</span></div>
+        <div class="account-step"><span class="account-step-number">3</span><span>Invest</span></div>
+      </div>
+
+      <div class="account-sheet-actions">
+        <p class="account-sheet-legal">By proceeding, I agree to the <button class="account-legal-link" type="button">T&amp;C</button> and <button class="account-legal-link" type="button">Privacy policy</button></p>
+        <button class="btn enabled" id="openAccountButton" type="button" onclick="openAccountFromPrompt()">Open your Account</button>
+        <button class="account-sheet-secondary" type="button" onclick="tryAnotherNumber()">Try another Number</button>
+      </div>
+    </section>
+  </div>
 </div>
 
 <svg width="0" height="0" style="position:absolute;">
@@ -1023,6 +1103,7 @@ const mobileLegal = document.getElementById('mobileLegal');
 const tryAnotherBtn = document.getElementById('tryAnotherBtn');
 const passwordBlock = document.getElementById('passwordBlock');
 const noAccountBlock = document.getElementById('noAccountBlock');
+const accountOverlay = document.getElementById('accountOverlay');
 const pwInput = document.getElementById('pwInput');
 const pwBox = document.getElementById('pwBox');
 const pwLabel = document.getElementById('pwLabel');
@@ -1091,6 +1172,7 @@ function togglePw(id, btn){
 }
 
 function resetToMobileEntry(){
+  hideAccountPrompt();
   mobileStep = 'entry';
   updateMobileHeaderMode();
   mobileInput.readOnly = false;
@@ -1129,6 +1211,7 @@ function onMobilePrimaryClick(){
 
 function startVerifying(){
   document.documentElement.classList.remove('mobile-input-focused');
+  mobileInput.blur();
   mobileStep = 'verifying';
   state.mobile = mobileInput.value;
   mobileInput.readOnly = true;
@@ -1148,13 +1231,13 @@ function showVerifyResult(){
   if(state.isNewUser){
     mobileStep = 'no-account';
     updateMobileHeaderMode();
-    mobileHeading.textContent = 'Welcome to TradeSmart!';
-    tryAnotherBtn.style.display='block';
+    mobileHeading.textContent = 'Welcome to TradeSmart';
+    tryAnotherBtn.style.display='none';
     mobileLegal.style.display='block';
-    noAccountBlock.classList.add('show');
-    mobileContinue.textContent = 'Open your Account';
-    mobileContinue.disabled = false;
-    mobileContinue.classList.add('enabled');
+    mobileContinue.textContent = 'Continue';
+    mobileContinue.disabled = true;
+    mobileContinue.classList.remove('enabled');
+    showAccountPrompt();
   } else {
     mobileStep = 'password';
     updateMobileHeaderMode();
@@ -1168,6 +1251,32 @@ function showVerifyResult(){
     setTimeout(()=>pwInput.focus(), 400);
   }
 }
+
+function showAccountPrompt(){
+  accountOverlay.classList.add('show');
+  accountOverlay.setAttribute('aria-hidden','false');
+  setTimeout(()=>document.getElementById('openAccountButton').focus({preventScroll:true}), 850);
+}
+
+function hideAccountPrompt(){
+  accountOverlay.classList.remove('show');
+  accountOverlay.setAttribute('aria-hidden','true');
+}
+
+function tryAnotherNumber(){
+  hideAccountPrompt();
+  resetToMobileEntry();
+  setTimeout(()=>mobileInput.focus(), 850);
+}
+
+function openAccountFromPrompt(){
+  hideAccountPrompt();
+  openEkycOtp();
+}
+
+document.addEventListener('keydown', event=>{
+  if(event.key === 'Escape' && accountOverlay.classList.contains('show')) tryAnotherNumber();
+});
 
 function onPasswordContinue(){
   if(pwInput.value.trim().toLowerCase() !== 'wrong'){
