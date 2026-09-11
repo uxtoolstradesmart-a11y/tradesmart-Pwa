@@ -1,0 +1,12 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="25" height="25" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="streamline:graph-bar-increase" clip-path="url(#clip0_0_124)">
+<path id="Vector" d="M22 24.1074H18.8V11.9741C18.8 11.7442 18.8885 11.5238 19.046 11.3613C19.2036 11.1987 19.4172 11.1074 19.64 11.1074H21.16C21.3828 11.1074 21.5964 11.1987 21.754 11.3613C21.9115 11.5238 22 11.7442 22 11.9741V24.1074ZM14.6 24.1074H11.4V14.5741C11.4 14.3442 11.4885 14.1238 11.646 13.9613C11.8036 13.7987 12.0172 13.7074 12.24 13.7074H13.76C13.9828 13.7074 14.1964 13.7987 14.354 13.9613C14.5115 14.1238 14.6 14.3442 14.6 14.5741V24.1074ZM7.2 24.1074H4V17.1741C4 16.9442 4.0885 16.7238 4.24603 16.5613C4.40356 16.3987 4.61722 16.3074 4.84 16.3074H6.36C6.58278 16.3074 6.79644 16.3987 6.95397 16.5613C7.1115 16.7238 7.2 16.9442 7.2 17.1741V24.1074Z" fill="#3F71EB" stroke="#3F71EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path id="Vector_2" d="M4 11.7857L22.5357 3.44643M21.1071 7.28571L22.5357 3.44643L18.6964 2" stroke="#3F71EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_0_124">
+<rect width="25" height="25" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+

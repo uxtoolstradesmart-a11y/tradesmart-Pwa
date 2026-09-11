@@ -1,4 +1,4 @@
-const CACHE = 'tradesmart-login-pwa-v41';
+const CACHE = 'tradesmart-login-pwa-v42';
 const APP_SHELL = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => Promise.all(
-      keys.filter(key => key !== CACHE).map(key => caches.delete(key))
+      keys.filter(key => key.startsWith('tradesmart-login-pwa-') && key !== CACHE).map(key => caches.delete(key))
     ))
   );
   self.clients.claim();
@@ -33,6 +33,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   if (event.request.method !== 'GET') return;
   const requestUrl = new URL(event.request.url);
+  if (requestUrl.href.startsWith(new URL('add-funds/', self.registration.scope).href)) return;
   const isPageRequest = event.request.mode === 'navigate' || requestUrl.pathname.endsWith('/index.html');
 
   if (isPageRequest) {
