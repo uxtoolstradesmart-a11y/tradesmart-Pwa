@@ -52,4 +52,9 @@ button:active:not(:disabled){filter:brightness(.97)}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 @media(display-mode:standalone){.dashboard-screen .status,.pay-screen .status{height:env(safe-area-inset-top)}.status img{display:none}.nav{height:calc(74px + env(safe-area-inset-bottom));padding-bottom:calc(17px + env(safe-area-inset-bottom))}}
 @media(max-width:390px){.option{padding:8px 5px;gap:4px;white-space:nowrap;font-size:13px}.option:first-child img{width:20px;height:20px}.option:last-child{font-size:15px}}
-
+.option{gap:10px;padding-left:10px;padding-right:10px}
+.selection-row{width:calc(100% + 32px);margin:-12px -16px;padding:12px 16px;text-align:left;border-radius:7px;min-height:48px}
+.selection-row[aria-expanded=true] .more img{transform:rotate(180deg)}
+.selection:has(.upi-input) .selection-row{margin-bottom:0}
+@media(max-width:390px){.option{gap:10px;padding-left:5px;padding-right:5px}}
+@media(max-width:350px){.option{white-space:normal;height:auto}.selection-row{width:calc(100% + 20px);margin-left:-10px;margin-right:-10px;padding-left:10px;padding-right:10px}}
