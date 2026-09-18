@@ -1,3 +1,4 @@
+import {market,indices,stocks,number,signed,stepMarket} from './market.js';
 const app = document.querySelector('#app');
 const asset=(name,ext='svg')=>`./assets/${name}.${ext}`;
 const pic=(name,cls='icon',ext='svg')=>`<img class="${cls}" src="${asset(name,ext)}" alt="">`;
@@ -12,29 +13,65 @@ app.className='dashboard-screen';
 app.innerHTML=`<div class="status">${pic('dash-imgPhoneUi','')}</div>
 <header class="dash-head">${pic('dash-imgLogoIcon','logo')}<div class="profile"><strong>ADITYA KUMAR</strong><p>ID : <b>ABC123</b></p></div><div class="head-icons">${pic('dash-imgIcon')}${pic('dash-imgIndices')}<span class="notification">${pic('dash-imgBellSolid1')}<span>2</span></span></div></header>
 <div class="dashboard">
-<div class="indices">${['NIFTY 50','BANKNIFTY 50','NIFTY 50'].map((n,i)=>`<div class="index"><div>${n} <small>Exp. 9 Jul</small></div><div class="quote"><b>24,456.87</b><span class="${i===1?'red':''}">${i===1?'-':'+'}00.20 (${i===1?'-':'+'}0.27%)</span></div></div>`).join('')}</div>
+<div class="indices">${indices.map(q=>`<div class="index" data-market="${q.id}"><div>${q.name}</div><div class="quote"><b data-price>${number(q.price)}</b><span data-change class="${q.direction}">${signed(q.change)} (${signed(q.percent)}%)</span></div></div>`).join('')}</div>${marketStatus()}
 <section class="activation"><div class="activation-heading">${pic('dash-imgFrame')}<div><strong>Your Account Activation is in progress...</strong><p>Usually done in 1-2 business days .</p></div></div><div class="steps"><div class="step">${pic('dash-imgComponent6')}<div>e-Sign Completed<small>14 Nov, 11:37 AM</small></div></div><div class="step">${pic('dash-imgComponent7')}<div>KYC Verification</div></div><div class="step">${pic('dash-imgComponent8')}<div>Exchange Approval</div></div></div></section>
 <section class="feature"><div class="feature-top"><div class="feature-copy"><span class="featured">FEATURED</span><h2>Trailing Stop Loss</h2><p>Protect profits. Limit losses.</p><ul><li>${pic('dash-imgSvg')}Automated risk management</li><li>${pic('dash-imgSvg')}Lock in profits as market moves</li></ul></div><img class="chart" src="./assets/chart.png" alt="Trailing stop loss chart"></div><button class="primary" data-outside>Try Trailing Stop Loss ${pic('dash-imgFrame1')}</button></section>
 <div class="dots" aria-label="Featured card 2 of 2"><span></span><span></span></div>
 <section class="fund-card" aria-label="Add funds"><img class="safe" src="./assets/fund-art.png" alt=""><div class="fund-content"><h2>Get ready to Trade!</h2><p>Add funds now, trade the moment your account is live!</p><div class="presets">${[100,200,500].map(v=>`<button data-preset="${v}" aria-pressed="${v===state.preset}" class="${v===state.preset?'active':''}">₹${v}</button>`).join('')}</div><button class="primary" id="start">Add Funds Now ${pic('dash-imgFrame2')}</button></div></section>
 <section class="links">${[['Top Traded Options','options-icon','png'],['Top Traded Futures','dash-imgRiStockFill','svg'],['IPOs','ipo-icon','png'],['Scanners','dash-imgStreamlineGraphBarIncrease','svg'],['Scalper','dash-imgGrommetIconsLineChart','svg'],['Movers','dash-imgChartColumnSolid1','svg']].map(([name,icon,ext])=>`<button class="tile" data-outside>${pic(icon,'icon',ext)}<span>${name}</span>${pic('dash-imgChevronDown','chevron')}</button>`).join('')}</section></div>
 <nav class="nav" aria-label="Main navigation">${[['Home','dash-imgHome1'],['Watchlist','dash-imgBinocularsSolid1'],['Portfolio','dash-imgEpSuitcaseLine'],['Orders','dash-imgFileText1'],['Menu','dash-imgMenu1']].map(([n,i])=>`<a href="${n==='Watchlist'?'#watchlist':'#'}" ${n==='Home'?'aria-current="page"':''}>${pic(i)}${n}</a>`).join('')}</nav><div class="toast" id="scope-note" role="status" hidden>Available in the full app. This prototype focuses on Add funds.</div>`;
+bindMarketControls();
 document.querySelector('#start').onclick=()=>start(state.preset);
 document.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{state.preset=Number(b.dataset.preset);dashboard();});
 document.querySelectorAll('[data-outside]').forEach(b=>b.onclick=()=>{const note=document.querySelector('#scope-note');note.hidden=false;setTimeout(()=>note.hidden=true,3000);});
 }
 const watchState={tab:0,query:'',sort:'default',tabs:['1','3','Buy on 5th','Buy NOW','WXYZ']};
-const watchQuotes=[['BANKNIFTY 27MAR25 999999 CE',true],['RELIANCE-EQ',false],['BANKBARODA-EQ',true],['TATA MOTORS',false],['TCS-EQ',true],['BBTC-EQ',true],['BANKNIFTY 27MAR25 999999 CE',false]];
+const watchQuotes=stocks;
+let marketPaused=false;
+let marketTimer=null;
+let lastMarketUpdate=new Date();
+function marketTime(){return lastMarketUpdate.toLocaleTimeString('en-GB',{hour12:false,timeZone:'Asia/Kolkata'})+' IST';}
+function marketStatus(){return `<div class="market-status"><span><i aria-hidden="true"></i>Demo prices · <span data-market-time>${marketPaused?'Paused':marketTime()}</span></span><button type="button" id="market-pause" aria-label="${marketPaused?'Resume':'Pause'} simulated prices" aria-pressed="${marketPaused}">${marketPaused?'Resume':'Pause'}</button></div>`;}
+function bindMarketControls(){document.querySelector('#market-pause').onclick=()=>{marketPaused=!marketPaused;const b=document.querySelector('#market-pause');b.textContent=marketPaused?'Resume':'Pause';b.setAttribute('aria-label',(marketPaused?'Resume':'Pause')+' simulated prices');b.setAttribute('aria-pressed',String(marketPaused));document.querySelector('[data-market-time]').textContent=marketPaused?'Paused':marketTime();syncMarketTimer();};}
+function syncMarketTimer(){
+ clearInterval(marketTimer);marketTimer=null;
+ if(marketPaused||document.hidden||location.hash==='#add-funds')return;
+ marketTimer=setInterval(()=>{
+  stepMarket();lastMarketUpdate=new Date();
+  if(location.hash==='#watchlist'&&['gainers','losers'].includes(watchState.sort))renderWatchQuotes();
+  updateMarketDOM();
+ },2200);
+}
+function updateMarketDOM(){
+ document.querySelectorAll('[data-market]').forEach(el=>{
+  const q=market.find(q=>q.id===el.dataset.market);
+  const price=el.querySelector('[data-price]');
+  price.textContent=number(q.price);
+  const change=el.querySelector('[data-change]');
+  change.className=q.direction;
+  if(el.classList.contains('watch-index')){
+   change.children[0].textContent=signed(q.change);
+   change.children[1].textContent=signed(q.percent)+'%';
+  }else change.textContent=signed(q.change)+' ('+signed(q.percent)+'%)';
+  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&q.tick){
+   price.getAnimations().forEach(a=>a.cancel());
+   price.animate([{backgroundColor:q.tick>0?'#079a8026':'#f0374526',color:q.tick>0?'#079a80':'#f03745'},{backgroundColor:'transparent',color:'#1a1a1a'}],{duration:850,easing:'ease-out'});
+  }
+ });
+ const time=document.querySelector('[data-market-time]');if(time)time.textContent=marketTime();
+}
+
 function watchlist(){
  app.className='watchlist-screen';
  app.innerHTML=`<div class="status">${pic('watch-status','')}</div>
  <header class="watch-search-header"><label class="watch-search">${pic('watch-ellipse','search-disc')}${pic('watch-search')}<input id="watch-search" aria-label="Search Scrip & Trade" placeholder="Search Scrip & Trade" value="${escapeHtml(watchState.query)}"></label><button class="watch-chart" aria-label="Scroll market indices">${pic('watch-chart')}</button></header>
- <section class="watch-indices" aria-label="Market indices">${[['NIFTY','16124.34','+100.05','+00.05%'],['BANK NIFTY','16124.34','-1264.85','-12.25%'],['SENSEX','60000.78.34','+250.50','+0.42%']].map(([name,price,change,percent],i)=>`<div class="watch-index"><strong>${name}</strong><span>${price}</span><div class="${i===1?'loss':'gain'}"><span>${change}</span><span>${percent}</span></div></div>`).join('')}<button class="watch-index-more" aria-label="Back to first index">${pic('watch-indices')}</button></section>
+ <section class="watch-indices" aria-label="Market indices">${indices.map(q=>`<div class="watch-index" data-market="${q.id}"><strong>${q.name}</strong><span data-price>${number(q.price)}</span><div data-change class="${q.direction}"><span>${signed(q.change)}</span><span>${signed(q.percent)}%</span></div></div>`).join('')}<button class="watch-index-more" aria-label="Back to first index">${pic('watch-indices')}</button></section>
  <div class="watch-controls"><div class="watch-tabs" role="tablist" aria-label="Watchlists">${watchState.tabs.map((name,i)=>`<button role="tab" aria-selected="${i===watchState.tab}" aria-controls="watch-quotes" data-watch-tab="${i}" class="${i===watchState.tab?'active':''}">${escapeHtml(name)}</button>`).join('')}</div><div class="watch-tools"><button id="watch-add" aria-label="Add watchlist">${pic('watch-plus')}</button><button id="watch-filter" aria-label="Sort watchlist">${pic('watch-filters')}</button></div></div>
- <section id="watch-quotes" class="watch-quotes" role="tabpanel" aria-label="Watchlist ${escapeHtml(watchState.tabs[watchState.tab])}"></section>
+ <section id="watch-quotes" class="watch-quotes" role="tabpanel" aria-label="Watchlist ${escapeHtml(watchState.tabs[watchState.tab])}"></section>${marketStatus()}
  <nav class="nav watch-nav" aria-label="Main navigation">${[['Home','home'],['Watchlist','watchlist'],['Portfolio','portfolio'],['Orders','orders'],['Menu','menu']].map(([name,icon])=>`<button ${name==='Watchlist'?'aria-current="page"':''} data-watch-nav="${name}">${pic('watch-'+icon)}<span>${name}</span></button>`).join('')}</nav>
  <dialog id="watch-dialog"></dialog><div class="toast" id="watch-note" role="status" hidden></div>`;
  renderWatchQuotes();
+ bindMarketControls();
  document.querySelector('#watch-search').oninput=e=>{watchState.query=e.target.value;renderWatchQuotes();};
  document.querySelectorAll('[data-watch-tab]').forEach(b=>b.onclick=()=>{watchState.tab=Number(b.dataset.watchTab);document.querySelectorAll('[data-watch-tab]').forEach(t=>{const selected=t===b;t.classList.toggle('active',selected);t.setAttribute('aria-selected',selected);});document.querySelector('#watch-quotes').setAttribute('aria-label','Watchlist '+watchState.tabs[watchState.tab]);renderWatchQuotes();});
  document.querySelectorAll('[data-watch-nav]').forEach(b=>b.onclick=()=>{if(b.dataset.watchNav==='Home')location.hash='';else if(b.dataset.watchNav!=='Watchlist'){const note=document.querySelector('#watch-note');note.textContent=b.dataset.watchNav+' is available in the full app.';note.hidden=false;setTimeout(()=>note.hidden=true,3000);}});
@@ -44,12 +81,12 @@ function watchlist(){
  document.querySelector('#watch-filter').onclick=()=>{const dialog=document.querySelector('#watch-dialog');dialog.innerHTML=`<form method="dialog"><h2>Sort watchlist</h2><label for="watch-sort">Order</label><select id="watch-sort"><option value="default">Default order</option><option value="name">Name A–Z</option><option value="gainers">Gainers first</option><option value="losers">Losers first</option></select><button class="primary">Apply</button><button type="button" id="watch-cancel">Cancel</button></form>`;dialog.querySelector('select').value=watchState.sort;dialog.querySelector('form').onsubmit=()=>{watchState.sort=dialog.querySelector('select').value;renderWatchQuotes();};dialog.querySelector('#watch-cancel').onclick=()=>dialog.close();dialog.showModal();};
 }
 function renderWatchQuotes(){
- let rows=watchState.tab<5?watchQuotes.map(([name,gain],i)=>({name,gain,i})):[];
+ let rows=watchState.tab<5?[...watchQuotes]:[];
  rows=rows.filter(q=>q.name.toLowerCase().includes(watchState.query.toLowerCase().trim()));
  if(watchState.sort==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
- if(watchState.sort==='gainers')rows.sort((a,b)=>Number(b.gain)-Number(a.gain));
- if(watchState.sort==='losers')rows.sort((a,b)=>Number(a.gain)-Number(b.gain));
- document.querySelector('#watch-quotes').innerHTML=rows.map(q=>`<div class="watch-row"><div class="watch-symbol"><span>${q.name}</span><small>NSE</small></div><div class="watch-value"><strong>10,000.25</strong><small class="${q.gain?'gain':'loss'}">${q.gain?'+9,999.99 +9,999.99%':q.i===6?'-5.50  -1.23%':'-30.00  -1.21%'}</small></div></div>`).join('')||'<p class="watch-empty">'+(watchState.tab>=5?'Your new watchlist is empty.':'No matching scrips.')+'</p>';
+ if(watchState.sort==='gainers')rows.sort((a,b)=>b.percent-a.percent);
+ if(watchState.sort==='losers')rows.sort((a,b)=>a.percent-b.percent);
+ document.querySelector('#watch-quotes').innerHTML=rows.map(q=>`<div class="watch-row" data-market="${q.id}"><div class="watch-symbol"><span>${q.name}</span><small>NSE</small></div><div class="watch-value"><strong data-price>${number(q.price)}</strong><small data-change class="${q.direction}">${signed(q.change)} (${signed(q.percent)}%)</small></div></div>`).join('')||'<p class="watch-empty">'+(watchState.tab>=5?'Your new watchlist is empty.':'No matching scrips.')+'</p>';
 }
 
 function valid(){return /^\d+(\.\d{1,2})?$/.test(state.amount)&&Number(state.amount)>0&&Number(state.amount)<=10000000&&(state.method!=='upi'||state.selected!==4||/^(?:[a-zA-Z0-9._-]{2,}@[a-zA-Z][a-zA-Z0-9.-]{1,}|[6-9]\d{9})$/.test(state.upi.trim()));}
@@ -80,7 +117,10 @@ document.querySelectorAll('[name="payment-app"]').forEach(r=>r.onchange=()=>choo
 const upi=document.querySelector('#upi-id');if(upi){upi.oninput=()=>{state.upi=upi.value;document.querySelector('#upi-error').hidden=true;updateValidity();};upi.onblur=()=>{document.querySelector('#upi-error').hidden=!state.upi||valid();};}
 document.querySelector('#pay-form').onsubmit=e=>{e.preventDefault();if(!valid()||state.expanded)return;document.querySelector('#receipt').textContent=`₹${Number(state.amount).toLocaleString('en-IN',{maximumFractionDigits:2})} via ${state.method==='bank'?'Net banking':state.selected===4?state.upi:apps[state.selected][0]}.`;document.querySelector('#confirmation').showModal();};
 updateValidity();}
-function render(){location.hash==='#add-funds'?payin():location.hash==='#watchlist'?watchlist():dashboard();}
+function render(){location.hash==='#add-funds'?payin():location.hash==='#watchlist'?watchlist():dashboard();syncMarketTimer();}
+document.addEventListener('visibilitychange',syncMarketTimer);
+window.addEventListener('pagehide',()=>{clearInterval(marketTimer);marketTimer=null;});
+window.addEventListener('pageshow',syncMarketTimer);
 window.addEventListener('hashchange',()=>{render();window.scrollTo(0,0);});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&state.expanded){state.expanded=false;render();document.querySelector('#more')?.focus();}});
 document.querySelector('#done').onclick=()=>{document.querySelector('#confirmation').close();location.hash='';};
