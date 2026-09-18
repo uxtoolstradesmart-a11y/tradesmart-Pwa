@@ -10,3 +10,5 @@
 @media(max-width:390px){.watch-symbol>span{font-size:14px}.watch-row small{font-size:12px}.watch-value strong{font-size:14px}}
 @media(max-width:350px){.watch-symbol>span{max-width:100%;overflow:hidden;text-overflow:ellipsis}.watch-row small{font-size:11px}}
 @media(display-mode:standalone){.watchlist-screen .status{height:env(safe-area-inset-top)}.watch-nav{height:calc(74px + env(safe-area-inset-bottom));padding-bottom:calc(17px + env(safe-area-inset-bottom))}}
+
+[data-price]{color:#1a1a1a;background:transparent}

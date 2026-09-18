@@ -18,9 +18,9 @@ export const indices=market.filter(q=>q.kind==='index');
 export const stocks=market.filter(q=>q.kind==='stock');
 export const number=value=>value.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
 export const signed=value=>(value>0?'+':value<0?'-':'')+number(Math.abs(value));
-export function stepMarket(random=Math.random){
+export function stepMarket(random=Math.random, quotes=market){
  const mood=(random()-.5)*.00018;
- for(const q of market){
+ for(const q of quotes){
   const volatility=q.kind==='index'?.00022:.00065;
   const move=q.price*(mood+(random()-.5)*volatility)+(q.anchor-q.price)*.025;
   const tickSize=.05;

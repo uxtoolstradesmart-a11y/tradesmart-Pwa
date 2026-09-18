@@ -36,14 +36,23 @@ function bindMarketControls(){document.querySelector('#market-pause').onclick=()
 function syncMarketTimer(){
  clearInterval(marketTimer);marketTimer=null;
  if(marketPaused||document.hidden||location.hash==='#add-funds')return;
+ const nextTick=new Map(market.map(q=>[q.id,Date.now()+100+Math.random()*1000]));
  marketTimer=setInterval(()=>{
-  stepMarket();lastMarketUpdate=new Date();
+  const now=Date.now();
+  const due=market.filter(q=>now>=nextTick.get(q.id));
+  if(!due.length)return;
+  for(const q of due){
+   stepMarket(Math.random,[q]);
+   nextTick.set(q.id,now+700+Math.random()*600);
+  }
+  lastMarketUpdate=new Date(now);
   if(location.hash==='#watchlist'&&['gainers','losers'].includes(watchState.sort))renderWatchQuotes();
-  updateMarketDOM();
- },2200);
+  updateMarketDOM(new Set(due.map(q=>q.id)));
+ },50);
 }
-function updateMarketDOM(){
+function updateMarketDOM(changed){
  document.querySelectorAll('[data-market]').forEach(el=>{
+  if(changed&&!changed.has(el.dataset.market))return;
   const q=market.find(q=>q.id===el.dataset.market);
   const price=el.querySelector('[data-price]');
   price.textContent=number(q.price);
@@ -53,10 +62,6 @@ function updateMarketDOM(){
    change.children[0].textContent=signed(q.change);
    change.children[1].textContent=signed(q.percent)+'%';
   }else change.textContent=signed(q.change)+' ('+signed(q.percent)+'%)';
-  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&q.tick){
-   price.getAnimations().forEach(a=>a.cancel());
-   price.animate([{backgroundColor:q.tick>0?'#079a8026':'#f0374526',color:q.tick>0?'#079a80':'#f03745'},{backgroundColor:'transparent',color:'#1a1a1a'}],{duration:850,easing:'ease-out'});
-  }
  });
  const time=document.querySelector('[data-market-time]');if(time)time.textContent=marketTime();
 }
