@@ -1,4 +1,5 @@
 import {market,indices,stocks,number,signed,stepMarket} from './market.js';
+import {renderOrder} from './order.js';
 const app = document.querySelector('#app');
 const asset=(name,ext='svg')=>`./assets/${name}.${ext}`;
 const pic=(name,cls='icon',ext='svg')=>`<img class="${cls}" src="${asset(name,ext)}" alt="">`;
@@ -35,7 +36,7 @@ function marketStatus(){return `<div class="market-status"><span><i aria-hidden=
 function bindMarketControls(){document.querySelector('#market-pause').onclick=()=>{marketPaused=!marketPaused;const b=document.querySelector('#market-pause');b.textContent=marketPaused?'Resume':'Pause';b.setAttribute('aria-label',(marketPaused?'Resume':'Pause')+' simulated prices');b.setAttribute('aria-pressed',String(marketPaused));document.querySelector('[data-market-time]').textContent=marketPaused?'Paused':marketTime();syncMarketTimer();};}
 function syncMarketTimer(){
  clearInterval(marketTimer);marketTimer=null;
- if(marketPaused||document.hidden||location.hash==='#add-funds')return;
+ if(marketPaused||document.hidden||location.hash==='#add-funds'||location.hash.startsWith('#order/'))return;
  const nextTick=new Map(market.map(q=>[q.id,Date.now()+100+Math.random()*1000]));
  marketTimer=setInterval(()=>{
   const now=Date.now();
@@ -90,7 +91,7 @@ function renderWatchQuotes(){
  if(watchState.sort==='name')rows.sort((a,b)=>a.name.localeCompare(b.name));
  if(watchState.sort==='gainers')rows.sort((a,b)=>b.percent-a.percent);
  if(watchState.sort==='losers')rows.sort((a,b)=>a.percent-b.percent);
- document.querySelector('#watch-quotes').innerHTML=rows.map(q=>`<div class="watch-row" data-market="${q.id}"><div class="watch-symbol"><span>${q.name}</span><small>NSE</small></div><div class="watch-value"><strong data-price>${number(q.price)}</strong><small data-change class="${q.direction}">${signed(q.change)} (${signed(q.percent)}%)</small></div></div>`).join('')||'<p class="watch-empty">'+(watchState.tab>=5?'Your new watchlist is empty.':'No matching scrips.')+'</p>';
+ document.querySelector('#watch-quotes').innerHTML=rows.map(q=>`<a class="watch-row" href="#order/${q.id}" data-market="${q.id}" aria-label="Place order for ${q.name}"><div class="watch-symbol"><span>${q.name}</span><small>${q.kind==='fno'?'NFO':'NSE'}</small></div><div class="watch-value"><strong data-price>${number(q.price)}</strong><small data-change class="${q.direction}">${signed(q.change)} (${signed(q.percent)}%)</small></div></a>`).join('')||'<p class="watch-empty">'+(watchState.tab>=5?'Your new watchlist is empty.':'No matching scrips.')+'</p>';
 }
 
 function valid(){return /^\d+(\.\d{1,2})?$/.test(state.amount)&&Number(state.amount)>0&&Number(state.amount)<=10000000&&(state.method!=='upi'||state.selected!==4||/^(?:[a-zA-Z0-9._-]{2,}@[a-zA-Z][a-zA-Z0-9.-]{1,}|[6-9]\d{9})$/.test(state.upi.trim()));}
@@ -121,7 +122,7 @@ document.querySelectorAll('[name="payment-app"]').forEach(r=>r.onchange=()=>choo
 const upi=document.querySelector('#upi-id');if(upi){upi.oninput=()=>{state.upi=upi.value;document.querySelector('#upi-error').hidden=true;updateValidity();};upi.onblur=()=>{document.querySelector('#upi-error').hidden=!state.upi||valid();};}
 document.querySelector('#pay-form').onsubmit=e=>{e.preventDefault();if(!valid()||state.expanded)return;document.querySelector('#receipt').textContent=`₹${Number(state.amount).toLocaleString('en-IN',{maximumFractionDigits:2})} via ${state.method==='bank'?'Net banking':state.selected===4?state.upi:apps[state.selected][0]}.`;document.querySelector('#confirmation').showModal();};
 updateValidity();}
-function render(){location.hash==='#add-funds'?payin():location.hash==='#watchlist'?watchlist():dashboard();syncMarketTimer();}
+function render(){const instrument=location.hash.startsWith('#order/')?stocks.find(q=>q.id===location.hash.slice(7)):null;instrument?renderOrder(app,instrument):location.hash==='#add-funds'?payin():location.hash==='#watchlist'?watchlist():dashboard();syncMarketTimer();}
 document.addEventListener('visibilitychange',syncMarketTimer);
 window.addEventListener('pagehide',()=>{clearInterval(marketTimer);marketTimer=null;});
 window.addEventListener('pageshow',syncMarketTimer);
