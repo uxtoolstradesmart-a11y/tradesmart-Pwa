@@ -1,5 +1,5 @@
 import {market,indices,stocks,number,signed,stepMarket} from './market.js';
-import {renderOrder} from './order.js?v=15';
+import {renderOrder} from './order.js?v=16';
 const app = document.querySelector('#app');
 const asset=(name,ext='svg')=>`./assets/${name}.${ext}`;
 const pic=(name,cls='icon',ext='svg')=>`<img class="${cls}" src="${asset(name,ext)}" alt="">`;

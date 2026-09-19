@@ -5,6 +5,7 @@ const LOT_SIZE=65;
 export function renderOrder(app,instrument){
  const fno=instrument.kind==='fno';
  const quote=instrument.price;
+ let pillObserver;
  const s={product:'Delivery',mode:'Qty',units:fno?LOT_SIZE:1,amount:quote,price:quote,pricing:fno?'Limit':'Market',side:'BUY',exchange:fno?'NFO':'NSE',stopType:'',trigger:'',stop:false,target:false,stopPrice:'',targetPrice:'',advanced:false,validity:'DAY'};
  const rate=()=>s.pricing==='Market'?quote:Number(s.price);
  const quantity=()=>s.mode==='Amount'?Math.floor(Math.round(Number(s.amount)*100)/Math.round(rate()*100)):Number(s.units);
@@ -23,6 +24,8 @@ export function renderOrder(app,instrument){
   err.textContent=valid()?'':fno&&(!Number.isInteger(q/LOT_SIZE)||q<=0)?`Enter a quantity in multiples of ${LOT_SIZE}, or a whole number of lots.`:'Enter a valid quantity or amount and positive prices (limit price tick: ₹0.05).';
  }
  function draw(){
+ pillObserver?.disconnect();
+ const previousPills=new Map([...app.querySelectorAll('.order-pills')].map(group=>[group.getAttribute('aria-label'),group.querySelector('.order-pill-indicator')?.getBoundingClientRect()]));
  app.className='order-screen';
  app.innerHTML=`<div class="status">${icon('status')}</div>
  <header class="order-head"><div class="order-title"><a href="#watchlist" aria-label="Back to watchlist">${icon('back')}</a><h1>${instrument.name}</h1><label class="order-side"><select aria-label="Buy or sell"><option ${s.side==='BUY'?'selected':''}>BUY</option><option ${s.side==='SELL'?'selected':''}>SELL</option></select>${icon('chevron')}</label></div>
@@ -59,6 +62,19 @@ export function renderOrder(app,instrument){
  app.querySelector('.order-price-help').onclick=()=>note('Limit: choose a price in ₹0.05 steps. Market: use the demo quote.');
  app.querySelector('.order-refresh').onclick=()=>{refresh();note('Demo margin recalculated.');};
  app.querySelector('.order-charges').onclick=()=>note('Charges are not calculated in this demo. Margin shown is the estimated order value.');
+ app.querySelectorAll('.order-pills').forEach(group=>{
+  const selected=group.querySelector('[aria-pressed="true"]');
+  const indicator=document.createElement('span');indicator.className='order-pill-indicator';indicator.setAttribute('aria-hidden','true');group.prepend(indicator);
+  const container=group.getBoundingClientRect(),target=selected.getBoundingClientRect(),old=previousPills.get(group.getAttribute('aria-label'));
+  const left=target.left-container.left,width=target.width;
+  indicator.style.left=left+'px';indicator.style.width=width+'px';indicator.style.height=target.height+'px';
+  if(old&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&(Math.abs(old.left-target.left)>.5||Math.abs(old.width-width)>.5)){
+   indicator.animate([{left:(old.left-container.left)+'px',width:old.width+'px'},{left:left+'px',width:width+'px'}],{duration:240,easing:'cubic-bezier(.22,1,.36,1)'});
+   group.closest('.order-field').querySelector('.order-stepper').animate([{opacity:.65},{opacity:1}],{duration:200,easing:'ease-out'});
+  }
+ });
+ pillObserver=new ResizeObserver(entries=>{for(const {target:group} of entries){if(!group.isConnected){pillObserver.disconnect();return;}const selected=group.querySelector('[aria-pressed="true"]'),indicator=group.querySelector('.order-pill-indicator');indicator.style.left=selected.offsetLeft+'px';indicator.style.width=selected.offsetWidth+'px';indicator.style.height=selected.offsetHeight+'px';}});
+ app.querySelectorAll('.order-pills').forEach(group=>pillObserver.observe(group));
  bindSwipe();refresh();
  }
  function note(text){const el=app.querySelector('#order-note');el.textContent=text;el.hidden=false;setTimeout(()=>el.hidden=true,3500);}
